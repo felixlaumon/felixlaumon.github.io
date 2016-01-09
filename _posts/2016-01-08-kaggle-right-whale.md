@@ -10,7 +10,7 @@ In this post I'll share my experience and explain my approach for the [Kaggle Ri
 
 ## 1. Background
 
-[Right whale](https://en.wikipedia.org/wiki/Right_whale) is an endangered species with fewer than 500 left in the Atlantic Ocean. As part of an ongoing preservation effort, experienced marine scientists track them across the ocean to understand their behaviors. The current process is quite time-consuming and laborious. It involves photographing these whales during aerial survey, selecting and importing the photos into a catalog. Finally trained researchers identify the photos against the known right whales, with the help of the unique callosity pattern on the whale head (see digram below). You can find more details at [the compeition page](https://www.kaggle.com/c/noaa-right-whale-recognition). The goal of the competition is to develop an automated process to identify the whales from aerial photos.
+[Right whale](https://en.wikipedia.org/wiki/Right_whale) is an endangered species with fewer than 500 left in the Atlantic Ocean. As part of an ongoing preservation effort, experienced marine scientists track them across the ocean to understand their behaviors, and monitor their health condition. The current process is quite time-consuming and laborious. It starts with photographing these whales during aerial surveys, selecting and importing the photos into a catalog, and finally the photos are compared against the known whales inside the catalog by trained researchers. Each right whale has unique callosity pattern on the whale head (see digram below). You can find more details at [the compeition page](https://www.kaggle.com/c/noaa-right-whale-recognition). The goal of the competition was to develop an automated process to identify the whales from aerial photos.
 
 ![](https://teacheratsea.files.wordpress.com/2015/05/img_2292.jpg)
 
@@ -34,17 +34,17 @@ Human](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Right_whale_siz
 
 ## 2. Dataset
 
-This dataset is special in 2 main ways from the perspective of machine learning.
+This dataset was special in 2 main ways from the perspective of machine learning.
 
 ### 2.1 Dataset distribution
 
-It is **non-straightforward to split the dataset into training and validation set**. There were only 4237 images for 427 right whales. Most importantly the number of images per whales varies hugely, as can be seen from the below histogram. **There were 24 whales that came with only 1 image in the dataset!**
+It was **non-straightforward to split the dataset into training and validation set**. There were only 4237 images for 427 right whales. Most importantly the number of images per whales varies hugely, as can be seen from the below histogram. **There were 24 whales that came with only 1 image in the dataset!**
 
 ![Images per whale](/assets/kaggle-right-whale/image_per_whale.png)
 
-A reasonable local validation set is essential to evaluate how the model will perform on the testing set and estimation of public / private score on Kaggle.
+A reasonable local validation set was essential to evaluate how the model will perform on the testing set and estimation of public / private score on Kaggle.
 
-The usual approach is to perform a **stratified split** so that the training and validation distribution are similar. To handle the whales with single photo, we can either *a) put those images just in the training set (overestimating);* or *b) just in the validation set (underestimate)*. **Note that putting the whales with 1 image into validation set means the classifier will not be able to predict those whales at all.**
+The usual approach is to perform a **stratified split** so that the training and validation label distribution were similar. To handle the whales with single photo, we can either a) *put those images just in the training set (overestimating);* or b) *just in the validation set (underestimate)*. **Note that putting the whales with 1 image into validation set would result in the classifier not be able to predict those whales at all!**
 
 However due to a noob mistake, I ended up doing a **random split**. To makes things worse, different classifiers were trained with a different split. I noticed this issue about 3 weeks before the deadline, and I decided not to fix them because I thought it was too late.
 
@@ -52,7 +52,7 @@ Ironically none of model trained before that point ended up in the final submiss
 
 ### 2.2 Extremely fine-grained classification
 
-Unlike many commonly cited classification tasks which is to **classify images into different species** ([bird](http://www.vision.caltech.edu/visipedia/CUB-200.html), [tree leaves](http://leafsnap.com/dataset/), dogs in ImageNet), this task is to **recognizie images of the same species into different individuals**. So the classifier must pick up the fine details of the callosity patterns regardless of image perspective and exposure etc.
+Unlike many commonly cited classification tasks which is to **classify images into different species** ([bird](http://www.vision.caltech.edu/visipedia/CUB-200.html), [tree leaves](http://leafsnap.com/dataset/), dogs in ImageNet), this task is to **classify images of the same species into different individuals**. So the classifier must pick up the fine details of the callosity patterns regardless of image perspective and exposure etc.
 
 Fortunately the academia has actually done immense work about recognition within a species – *Homo sapiens*. Realizing the similarity of recognition whale and human would become a source of many of my ideas.
 
@@ -96,15 +96,15 @@ The network was trained with heavy data augmentation, including rotation, transl
 
 **Very leaky rectified linear unit (VLeakyReLU)** was used for all of the models.
 
-This naive approach yielded a validation score of just ~5.8 which was barely better than a random guess. This surprised me because I expected the network to be able to focus on the whale given the non-cluttered background. My hypothesis to the low score was that the **whale labels did not provide a strong enough training signal in this relatively small dataset**.
+This naive approach yielded a validation score of just ~5.8 which was barely better than a random guess. This surprised me because I expected the network to be able to focus on the whale given the non-cluttered background. My hypothesis for the low score was that the **whale labels did not provide a strong enough training signal in this relatively small dataset**.
 
 To prove my hypothesis, I looked at the **saliency map** of the neural network that is analogous to eye tracking. This was done by sliding a black box around the image and keeping track of the probability changes.
 
-[digram of procedure and actual saliency map]
+![Saliency map of the baseline model](/assets/kaggle-right-whale/saliency_map.png)
 
 The saliency map suggested that the network was "looking at" the **ocean waves instead of the whale head** to identify the whale.
 
-I further experimented with different image sizes (e.g. 512x512) but with no improvement.
+I further experimented with larger image sizes (e.g. 512x512) but found image size did not accuracy.
 
 ---
 
@@ -116,9 +116,11 @@ To help the classifier **locating the whale head** and hence improve the score, 
 
 A localization CNN took the original photos as input and output a **bounding box around the whale head**, and the classifier was fed the **cropped image**.
 
+This is made possible thanks to the [annotations by Vinh Nguyen](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17421/complete-train-set-head-annotations) posted to the competition forum.
+
 #### 4.2.1 Localizer
 
-I treated the localization problem as a **regression**, so the objective of the localizer CNN is to **minimize the mean squared error (MSE) between the predicted and actual bounding box**. The targets were normalized into (0, 1).
+I treated the localization problem as a **regression** problem, so that the objective of the localizer CNN is to **minimize the mean squared error (MSE) between the predicted and actual bounding box**. The bounding boxes were represented by x, y, width and height and were normalized into (0, 1) by dividing with the image size.
 
 Similar to the baseline model, the network structure is based on OxfordNet. Data
 augmentation was applied to the images as well. To calculate the bounding box of the transformed image, I created a boolean mask denoting the bounding box, and then applied the transformation to this mask. The augmented bounding box were calculated by the transformed mask.
@@ -145,21 +147,21 @@ The classifier for this approach was again a OxfordNet trained on cropped 256x25
 
 Ultimately this approach led to a validation score of about ~5, which was better than the naive approach but still not a significant improvement.
 
-I experimented with the amount of padding around the predicted bounding box and found that it has no effect on accuracy.
+I experimented with the amount of padding around the predicted bounding box and found that it did not effect on accuracy.
 
 ---
 
 ### 4.3 Whale Head Aligner
 
-At this point, it was clear that the **main performance bottleneck is that the classifier was not able to focus on the actual discriminating part of the whales (i.e. the callosity pattern)**. So in this approach, a new **aligner replaced the localizer**. Particularly aligner made sure that in the cropped image whale **bonnet is always right to the blowhead**.
+At this point, it was clear that the **main performance bottleneck is that the classifier was not able to focus on the actual discriminating part of the whales (i.e. the callosity pattern)**. So in this approach, a new **aligner replaced the localizer**. Particularly aligner rotate the images so the whale **bonnet is always right to the blowhead**.
 
 ![Whale Facial Aligner](/assets/kaggle-right-whale/aligner_localization_approach.png)
 
-The head-cropped images were extracted by applying an affine transformation according to the predicted coordinates. This was made possible by the annotation from Anil Thomas.
+The head-cropped images were extracted by applying an affine transformation according to the predicted coordinates. This was made possible by the [annotations from Anil Thomas](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17555/try-this).
 
-While the architecture looked very similar to the previous approach, the fact that the images were aligned had a huge implication for the classifier -- **the classifier no longer need to learn features which are invariant to extreme translation and rotation**.
+While the architecture looked very similar to the previous approach, the fact that the images were aligned had a huge implication for the classifier -- **the classifier no longer need to learn features which are invariant to extreme translation and rotation**. However note that the aligned image were still not normalized by camera perspective, occlusion and exposure etc.
 
-This approach somewhat reminded me of the Facebook’s **[DeepFace](https://www.cs.toronto.edu/~ranzato/publications/taigman_cvpr14.pdf)** paper. DeepFace is a human face recognition system and its pre-processing step was to apply **3D frontalization** to the face image. Obviously, it was not possible to perform similar alignment with just 2 points, but I believed it was reasonable to assume that accuracy will increase given more localization points that allows more non-linear transformation.
+This approach somewhat reminded me of the Facebook’s **[DeepFace](https://www.cs.toronto.edu/~ranzato/publications/taigman_cvpr14.pdf)** paper. DeepFace is a human face recognition system and it applied **3D frontalization** to the face image before feeding it to the neural network. Obviously, it was not possible to perform similar alignment with just 2 points, but it was reasonable to assume that accuracy can be improved if there were more more annotation keypoints, as that would allow more non-linear transformation.
 
 They also employed locally-connected convolutional layers, which different filters were learned at different pixel locations. However I did not ended up using the locally-connected convolutional layer in my models because simply the implementation in [TheanoLinear](https://github.com/jaberg/TheanoLinear) doesn't seem to be compatible the Theano version I am using. 
 
@@ -199,15 +201,71 @@ The first ResNet-based network I experimented with was somewhat similar to the p
 
 I’d like to emphasize here **my ResNet implementation was my own interpretation and might not be correct at all** and might not be consistent with the original authors' implementation.
 
-I then tried to replicate the **50-layer ResNet with bottlenecking** (see Table 1 of the paper). This configuration overfits very quickly possibly due to the "width" of the network. So I followed the advice of the authors in section 4.2 and regularize the network by reducing the number of filters, and the network overfits much later in the training process. I did not use bottlenecking after this point the filter sizes were not big.
+I then tried to replicate the **50-layer ResNet with bottlenecking** (see Table 1 of the paper). This configuration overfitted very quickly possibly due to the "width" of the network. So I followed the advice of the authors in section 4.2 and regularize the network by reducing the number of filters, and the network overfitted much later in the training process. I did not use bottlenecking after this point the filter sizes were not big.
 
-Later I turned back on dropout on the after the global pooling layer and found that it helped prevent overfitting significant. In fact, I found that dropout higher than 0.5 (e.g. 0.8) improves the validation score even more.
+Later I turned dropout back on and found that it helped prevent overfitting significantly. In fact I found that dropout higher than 0.5 (e.g. 0.8) improves the validation score even more.
 
-I also successfully trained a **very deep and very thin CNN with 69 layers** at the very end of the competition. 
+Near the end of the competition, I also successfully trained a **very deep and very thin ResNet with 67 layers**. Below is its model definition:
 
-Interestingly I found that using the ADAM optimizer instead of SGD leads to more stable validation loss. Also, comparing to the 19-layer OxfordNet, the 69-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rate.
+{% highlight py %}
+l = nn.layers.InputLayer(
+    name='in', shape=(None, 3, image_size, image_size)
+)
+# 256x256
 
-Overall, I feel that there is still a lot of room to explore to best apply residual training to neural network. For example, if residual learning is so effective, would learning the residual of the residual error be even more effective (shortcut of shortcut layer)? Why does the optimizer has difficulty learning the original mapping in the first place? Can we combine ResNet with Highway Network? If the degradation problem is largely overcome, are the existing regularization techniques (maxout, dropout, l2 etc.) still applicable?
+l = conv2dbn(
+    l, name='l1c1', num_filters=32, filter_size=(7, 7), stride=2,
+    **conv_kwargs
+)
+# 128x128
+
+l = nn.layers.dnn.MaxPool2DDNNLayer(l, name='l1p', pool_size=(3, 3), stride=2)
+# 64x64
+
+for i in range(3):
+    l = residual_block(
+        l, name='2c%s' % i,
+        num_filters=48, filter_size=(3, 3),
+        num_layers=2, **conv_kwargs
+    )
+# 64x64
+
+for i in range(4):
+    actual_stride = 2 if i == 0 else 1
+    l = residual_block(
+        l, name='3c%s' % i,
+        num_filters=64, filter_size=(3, 3), stride=actual_stride,
+        num_layers=2, **conv_kwargs
+    )
+# 32x32
+
+for i in range(23):
+    actual_stride = 2 if i == 0 else 1
+    l = residual_block(
+        l, name='4c%s' % i,
+        num_filters=80, filter_size=(3, 3), stride=actual_stride,
+        num_layers=2, **conv_kwargs
+    )
+# 16x16
+
+for i in range(3):
+    actual_stride = 2 if i == 0 else 1
+    l = residual_block(
+        l, name='5c%s' % i,
+        num_filters=128, filter_size=(3, 3), stride=actual_stride,
+        num_layers=2, **conv_kwargs
+    )
+# 8x8
+
+l = nn.layers.dnn.Pool2DDNNLayer(l, name='gp', pool_size=8, mode='average_inc_pad')
+l = nn.layers.DropoutLayer(l, name='gpdrop', p=0.8)
+
+l = nn.layers.DenseLayer(l, name='out', num_units=n_classes, nonlinearity=nn.nonlinearities.softmax)
+{% endhighlight %}
+
+Interestingly comparing with SGD, the ADAM optimizer led to more stable validation loss. Also, comparing to the 19-layer OxfordNet, the 67-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rate.
+
+At the end, I still had a lot of questions about how to best apply residual training to neural network. For example, if residual learning is so effective, would learning the residual of the residual error be even more effective (shortcut of shortcut layer)? Why does the optimizer has difficulty learning the original mapping in the first place? Can we combine ResNet with Highway Network? If the degradation problem is largely overcome, are the existing regularization techniques (maxout, dropout, l2 etc.) still applicable?
 
 ### 5.2 Inception v3
 
@@ -221,9 +279,7 @@ I did not ended up using the Inception network in the final ensemble.
 
 Because of my late start, the neural network training duration became a huge problem. Most models used for submission **took at least 36 hours to fully converge**. So I bought an old GTX670 to optimize the hyperparameter for the aligner, while I use my main GTX980Ti for the classifier.
 
-I found that having **additional graphics card much more helpful than having a faster graphics card**. So one week before the deadline, I figured out a system that allows me to easily train a model in AWS EC2 g2.xlarge.
-
-I ended up with a system which allows me to **train a model on g2.xlarge as if I am training it locally**, by running this command.
+I found that having **additional graphics card much more helpful than having a faster graphics card**. So one week before the deadline, I hacked together a system that allowed me to easily **train a model on AWS EC2 GPU instances (g2.xlarge) as if I was training it locally**, by running this command.
 
     eval “$(docker-machine env aws0x)”
     docker run -ti \
@@ -236,26 +292,28 @@ I ended up with a system which allows me to **train a model on g2.xlarge as if I
         felixlaumon/kaggle-right-whale \
         ./scripts/train_model.py --model … --data --use_cropped --continue_training
 
-The model definitions were built as part of the container image. The whale images were uploaded to S3 from my local machine when necessary and was mounted inside the container. The trained models were then synced back to the S3 every minute and then were to my local machine.
+The model definitions were built as part of the container image. The whale images were uploaded to S3 from my local machine when necessary and were mounted inside the container. The trained models were then synced back to the S3 every minute and then to my local machine.
 
-There are still quite a lot of quirks to be worked out. But this system allowed me to **optimize the neural network hyperparameters that would have taken a month locally**. Most importantly, I felt more "free" to **try out more far-fetched ideas without slowing down ongoing model training**. At peak, 6 models were training at the same time. Without this system, I would not be able to make an ensemble used in the final submission in time.
+There are still quite a lot of quirks to be worked out. But this system allowed me to **optimize the neural network hyperparameters that would have taken one month locally**. Most importantly, I felt more "free" to **try out more far-fetched ideas without slowing down ongoing model training**. At peak, 6 models were training at the same time. Without this system, I would not be able to make an ensemble used in the final submission in time.
 
-I believed this could be quite handy to other Kaggle competitions that requires neural network training such as Image recognition. Let me know if you were interested, and I could clean up my code for this part later on.
+I believed this could be quite handy to other Kaggle competitions that requires neural network training such as Image recognition. Let me know if you were interested, and I could clean up my code for this part.
 
 ---
 
 ## 6. Final Submission
 
-The final submission is an ensemble of 6 models:
+The final submission was an ensemble of 6 models:
 
 - **3 x 19-layer OxfordNet**
 - **1 x 31-layer ResNet**
 - **1 x 37-layer ResNet**
-- **1 x 69-layer ResNet**
+- **1 x 67-layer ResNet**
 
-The outputs of the **global average layer** were extracted and a simple **logistic regression classifier** were trained on the concatenated features.
+The outputs of the **global averaging layer** were extracted and a simple **logistic regression classifier** were trained on the concatenated features.
 
 I tried to perform PCA to reduce the dimensionality of the extracted features but found no improvements to the validation score.
+
+A funny sidenote -- 24 hours before the final deadline, I discovered that the logistic regression classifier was overfitting horrendously because the model accuracy on the training set was 100% and logloss 0. I was in full-on panic mode for the next 12 hours because I thought something must have gone horribly wrong. Later I realized that the features were extracted with all non-deterministic layers turned off (esp. the p=0.8 dropout layer), and that was why it did not match the training loss (which was measured with dropout turned on). I wondered if monitoring training loss without dropout turned off would be an useful way to see if the network was overfittng or not.
 
 ---
 
@@ -267,9 +325,9 @@ Here are some more ideas that should yield significant score improvement. But I 
 
 ### 7.1. Reposing the Problem to Generate more training data
 
-As mentioned before, one of the main challenges is the uneven distribution of number of images per whale, and the limited number of images in general. To avoid this problem, we can first **repose the task as to identify if a pair of images belong to the same whale or not**. Then we can train a classifier to learn an **embedding** which maps the whale images into compact feature vectors. The objective of the classifier was to maximize the euclidean distance of the feature vectors that contains the different whales, and minimize the distance with same whales. This idea is largely based on **[FaceNet](http://arxiv.org/pdf/1503.03832v3.pdf)**.
+As mentioned before, one of the main challenges was the uneven distribution of number of images per whale, and the limited number of images in general. To avoid this problem, we can first **repose the task as to identify if a pair of images belong to the same whale or not**. Then we can train a classifier to learn an **embedding** which maps the whale images into compact feature vectors. The objective of the classifier was to maximize the euclidean distance of the feature vectors that contains the different whales, and minimize the distance with same whales. This idea was largely based on **[FaceNet](http://arxiv.org/pdf/1503.03832v3.pdf)**.
 
-I briefly experimented with this approach with a Siamese network with the contrastive loss function, but it did not converge. The network was trained with pairs of images which half of them were the same whale and the other half were different. I suspected that the **online triplet image mining method** used by FaceNet is actually essential to successful convergence.
+I briefly experimented with this approach with a Siamese network with the contrastive loss function, but it did not converge. The network was trained with pairs of images which half of them were the same whale and the other half were different. I suspected that the **online triplet image mining method** used by FaceNet was actually essential to successful convergence.
 
 ![Diagrams from FaceNet](/assets/kaggle-right-whale/facenet.png)
 
@@ -279,17 +337,17 @@ I briefly tried to apply **[Spatial Transformer Network](http://arxiv.org/pdf/15
 
 ![ST-CNN architecture](/assets/kaggle-right-whale/st_cnn.png)
 
-I was particularly confident that ST-CNN would work well because it achieved **start-of-the-art performance on the CUB-200-2011 bird classification** dataset with multiple localizers. (Arguably bird classification is much less fine grained than whale recognition. e.g. colors of birds of different species vary a lot, but not for whales)
+I was particularly confident that ST-CNN would work well because it achieved **start-of-the-art performance on the CUB-200-2011 bird classification** dataset using multiple localizers. (Arguably bird classification is much less fine grained than whale recognition. e.g. colors of birds of different species vary a lot, but not for whales)
 
 ![ST-CNN localizer results](/assets/kaggle-right-whale/st_cnn_birds.png)
 
-The first ST-CNN model was trained with 512x512 images and unfortunately, it was making **random transformation**, e.g. zooming in waves instead of the whale head. Note that this echoed the result of the saliency map from section 4.1. I believed my explanation before applied here as well -- the whale labels did not provide a strong enough training signal.
+The first ST-CNN model was trained with 512x512 images and unfortunately, it was making **random transformation**, e.g. zooming in waves instead of the whale head. While I could not eliminate if this was due to a bug in my implementation, this echoed the result of the saliency map from section 4.1. I believed my explanation before applied here as well -- the whale labels alone did not provide a strong enough training signal.
 
 So in my next attempt, I tried to **supervise the localization net by adding a crude error term to the objective function** -- the MSE of the predicted affine transformation matrix and the actual matrix generated by the bonnet and blowhead annotation. Unfortunately, I was not able to compile this network with Theano.
 
-So it remained an open question for me -- **Can localization network of ST-CNN can be trained in a supervised manner? Will semi-supervised training further improve the performance of ST-CNN or not.**
+So it remained an open question for me -- **Can localization network of ST-CNN be trained in a supervised manner? Will semi-supervised training further improve the performance of ST-CNN or not.**
 
-One approach I did not try is 1) **pre-train localization network** to learn the affine transformation that would align the image to the whale's blowhead and bonnet, 2) follow normal procedure to train the whole ST-CNN. Perhaps in the 2nd stage, the learning rate must be reduced to prevent the localizer from drifting away from whale head. It might also be a good idea to pretrain the classification part as well to prevent the need of manually adjusting the learning rate altogether. This is something I would have attempted if I had more time.
+One approach I did not try was 1) **pre-train localization network** to learn the affine transformation that would align the image to the whale's blowhead and bonnet, 2) follow normal procedure to train the whole ST-CNN. Perhaps in the 2nd stage, the learning rate must be reduced to prevent the localizer from drifting away from whale head. It might also be a good idea to pretrain the classification part as well to prevent the need of manually adjusting the learning rate altogether. This is something I would have attempted if I had more time.
 
 *I am particularly interested in understanding how ST-CNN should be applied to this dataset. Please contact me if you have any suggestions.*
 
@@ -297,25 +355,25 @@ One approach I did not try is 1) **pre-train localization network** to learn the
 
 Transfer learning offers an alternative way to **reduce training time**, other than to simply spawning more GPU instances.
 
-For training networks with same architecture and configuration, I could have simply load the weights learned from a previous network. However, for networks with different number of layers or filters, loading weights from a similar network doesn't seem to work very well. In fact, most of the time it was worse than without using the learned weight! Transferring learned features to a slightly different network is a much more use case because my goal is to optimize the number of filters and number of layers
+For training networks with same architecture and configuration, I could have simply load the weights learned from a previous network. However, for networks with different number of layers or filters, loading weights from a similar network doesn't seem to work very well. In fact, most of the time it was worse than without using the learned weights! Transferring learned features to a slightly different network was a much more common use case because my goal was to optimize the number of filters and number of layers
 
 I investigated briefly with **[Net2Net](http://arxiv.org/pdf/1511.05641v2.pdf)** but wasn't able to implement its algorithm.
 
 ### 7.4 Pre-training
 
-Pre-training with test images might have helped because the **testing set had more images than the training set**. Combining with section 6.1, we could even **apply the learned embedding to the test set to generate labels**. I expected this might lead to better result than **pseudo-labelling.**
+Pre-training the classifier with test images might have helped because the **testing set had more images than the training set**. Combining with section 6.1, we could even **apply the learned embedding to the test set to generate labels**. I expected this might lead to better result than **pseudo-labelling.**
 
 ---
 
 ## 8. Conclusion
 
-I had a lot of fun working on this challenge, and I learned a lot when trying to find new and interesting ideas from academic research. The last 3 weeks were actually very exhausting for me, because there were so much to do and I was working alone! Next time I would definitely team up.
+I had a lot of fun working on this challenge, and I learned a lot when trying to find new and interesting ideas from academic research. The last 3 weeks were very exhausting for me, because there were so much to do and I was working alone! Next time I would definitely team up.
 
-I'd like to congratulates other winners and other top performing teams and contestants. I am still amazed by the progress we made in the leaderboard in the last 3 weeks!
+I'd like to congratulate other winners and other top performing teams and contestants. I am still amazed by the progress we made in the leaderboard in the last 3 weeks!
 
 I strongly encourage you to check out the [competition forum](https://www.kaggle.com/c/noaa-right-whale-recognition/forums) as they have been many alternative approaches shared throughout the competition. In particular, I am surprised by the number of non-deep-learning approach with localizing the whale! e.g. [unsupervised physics based whale detector](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17921/physics-based-unsupervised-whale-detector), [detector based on principle components of color channel](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/18251/another-whale-detector), [histogram similarity](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17473/finding-the-whale-by-histogram-similarity), [mask based regression](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/16684/alternative-approaches-to-whale-localization)
 
-Finally, I'd like to thank Kaggle for hosting this compeitition, and MathWorks for sponsoring and providing a free copy of MATLAB for all participants. Of course this was not possible without NOAA for releasing this dataset and the huge effort from Christin Khan and Leah Crowe for hand labelling the images! I hope we will see more datasets from NOAA? ;)
+Finally, I'd like to thank Kaggle for hosting this compeitition, and MathWorks for sponsoring and providing a free copy of MATLAB for all participants. Of course this was not possible without NOAA releasing this rare dataset and the huge effort from Christin Khan and Leah Crowe for hand labelling the images! I hope we will see more datasets from NOAA? ;)
 
 The source code is unfortunately very messy in its current state so it might take a while for me to clean it up. I will update this blog post once it is available!
 
