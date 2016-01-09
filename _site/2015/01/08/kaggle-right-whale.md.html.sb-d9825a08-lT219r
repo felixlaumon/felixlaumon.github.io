@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Kaggle Right Whale 2nd place writeup</title>
+  <meta name="description" content="In this post, I’ll share and explain my experience and my approach for the Kaggle Right Whale challenge. I managed to finish in 2nd place.">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://felixlaumon.github.io/2015/01/08/kaggle-right-whale.md.html">
+  <link rel="alternate" type="application/rss+xml" title="Felix Lau's Blog" href="http://felixlaumon.github.io/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Felix Lau's Blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Kaggle Right Whale 2nd place writeup</h1>
+    <p class="post-meta"><time datetime="2015-01-08T00:00:00+08:00" itemprop="datePublished">Jan 8, 2015</time></p>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    In this post, I’ll share and explain my experience and my approach for the Kaggle Right Whale challenge. I managed to finish in 2nd place.
+
+## 1. Introduction
+
+The Kaggle Right Whale competition is an image recognition challenge. The goal is to predict right whale ID for each of the given aerial photos. To clarify, the whales in the images are of the same species, and the task is to predict the “name” of the right whale.
+
+This challenge is very unique because there are fewer than 500 right whale left in the entire Atlantic ocean and dataset dataset contains 427 individual whales. An automated whale recognition system would allow us to better understand their behaviour and most importantly help us to preserve these majestic creatures.
+
+Marine scientists usually recognize using the unique patterns at the top of the whale head.
+
+Image quality varies quite a bit because they are probably taken in different years with different camera equipments. Note that some images are overexposed and some are underexposed. But in general, I find it very difficult to identify the whale myself with even using the highest quality images.
+
+Here are 4 pairs of right whales, can you guess which ones are the same and which ones are not?
+
+![Same](/assets/kaggle-right-whale/whale_same2.png)
+![Different](/assets/kaggle-right-whale/whale_different1.png)
+![Same](/assets/kaggle-right-whale/whale_same1.png)
+![Different](/assets/kaggle-right-whale/whale_different2.png)
+
+One thing that I didn't notice from the images is how big these whales
+actually are. They can grow to 50 feet, weigh up to 170,000 lbs, and has a life
+span of typically 50 years. You can
+learn more fascinating facts about right whales from the [NOAA
+website](http://www.nmfs.noaa.gov/pr/species/mammals/whales/north-atlantic-right-whale.html)
+
+![Whale size vs.
+Human](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Right_whale_size.svg/686px-Right_whale_size.svg.png)
+
+## 2. Dataset
+
+This dataset is also unique in several ways from the perspective of machine learning.
+
+### 2.1 Dataset distribution
+
+There were only 4237 images for 422 right whales (on average only X image per whale!_ Most importantly the number of image per whales is extremely diverse. There are 24 whales with only one image!
+
+![Images per whale](/assets/kaggle-right-whale/image_per_whale.png)
+
+This makes it non-straightforward to split the dataset into training and validation set. A reasonable local validation set is essential to evaluate how the model will perform on the testing set and estimation of public / private score on Kaggle.
+
+The usual approach is to perform a stratified split so that the training and validation distribution are similar. To handle the whales with single photo, we can either a) put those images just in the training set (overestimating); or b) just in the validation set (underestimate). Note that putting into validation set means the classifier will not be able to predict those whales at all.
+
+However due to a noob mistake, I ended up doing a random split. To makes things worse, different classifiers were trained with a different split. I noticed this issue about 3 weeks before the deadline, and I decided not to fix them because I thought it was too late.
+
+Ironically none of model trained before that point ended up in the final submission. Lesson learned: it is never too late to makes thing right, just like in life.
+
+### 2.2 Extremely fine-grained classification
+
+Unlike many commonly cited classification tasks that require the classifier to **group images into different species** ([bird](http://www.vision.caltech.edu/visipedia/CUB-200.html), [tree leaves](http://leafsnap.com/dataset/), dogs in ImageNet), this task is to **group images of the same species into different individuals**. So the classifier must pick up the fine details of the whale patterns regardless of image perspective and exposure etc.
+
+Fortunately the academia has actually done immense work about recognition within a species – *Homo sapiens*. Realizing the similarity of recognition whale and human would become a source of many of my ideas.
+
+## 3. Hardware and Software
+
+#### Software
+
+All code was written in Python. The neural networks were trained using Lasagne, Nolearn and cuDNN. scikit-image, pandas and scikit-learn were used for image processing, data processing and final ensembling respectively. I also made use of iPython / Jupyter notebook to sanity check my result and and ipywidgets to quickly browse through the images. Most of the charts in the blog post were made using matplotlib and seaborn.
+
+#### Hardware
+
+Most of the models are trained on GTX 980Ti and GTX 670 on a local Ubuntu machine. I made use of AWS EC2 near the very end of the competition, which will be explained further in Section 5.2
+
+Who needs a heater when your machine is crunching numbers all the time!
+
+![GPU temps](/assets/kaggle-right-whale/nvidia-temp.png)
+
+## 4. Approaches
+
+All my approaches are based on deep convolutional neural network (CNN), as I believed that human is no match to machine in extracting image feature. However it turns out that machine is not quite there yet. Understanding neural network performance bottleneck proves to be very important.
+
+Below are 3 approaches I attempted in chronological order.
+
+### 4.1 Baseline Naive approach
+
+After decided to participate in this competition, the first thing I did is to establish a baseline classifier with CNN.
+
+Virtually no image processing is performed, except to resize them to 256x256 and stored as numpy memmap. I did not even mean subtract the images. The target of the network is the whale ID encoded to 0 and 447 as integer. The network architecture is based on VGG-net.
+
+VGG-net was the winner of the 2014 ImageNet challenge. VGG-net contains a series of stacks of small 3x3 convolutional filters immediately followed by max-pooling. The network usually ends with a few stacks of fully connected layers. See [http://arxiv.org/pdf/1409.1556v6.pdf](http://arxiv.org/pdf/1409.1556v6.pdf) for details.
+
+The network was trained with heavy data augmentation, including rotation, translation, shearing and scaling. I also added “brightness” augmentation to account for underexposed and overexposed images. I found that color permutation doesn’t help, which makes sense because there is not much “hue” variation in the images.
+
+Very leaky rectified linear unit (VLeakyReLU) was used for all of the models.
+
+This naive approach yielded a validation score of just ~5.8 which is barely better than a random guess. This surprised me because I expected the network to be able to focus on the whale because the background is not that cluttered. My theory is that the whale label does not provide strong enough training signal in the relatively small dataset.
+
+To confirm my theory, I looked at the saliency map of the neural network by sliding a black box around the image and keep track of the probability changes. The saliency map is analogous to eye tracking for neural network.
+
+[saliency map]
+
+I further experimented with different sizes (512x512) but with no success.
+
+### 4.2 Bounding Box localization
+
+My next approach was aimed to help the classifier to locate the whale. The training became a 2-step process:
+
+A localization CNN that take the raw image and output the bounding box of the head
+The image is cropped with the bounding box and is passed to the final classifier
+
+[diagram]
+
+This is made possible thanks to the annotation from xxx. I expected the classifier to perform much better because it no longer needs to learn to look for the whale.
+
+#### Localizer
+
+I treated the localization problem as a regression, so the objective of the localizer CNN is to minimize the mean squared error (MSE) between the predicted and actual bounding box. The target is normalized into (0, 1).
+
+Similar to the baseline model, the network structure is based on VGG-net. Data
+augmentation applied to the images as well. To calculate the bounding box of the
+transformed image, I applied
+
+[Bounding box augmentation generation]
+
+The model took a long time to converge and slows down significantly after 10% of the training time. I suspect that MSE with normalized coordinates is not ideal for regressing bounding boxes, but I could not find any alternative objective function from related literatures.
+
+The more sensible metrics should measure the **overlap between the actual and predicted bounding boxes**. So I further evaluate the localizer with interaction over union (IOU) which is the ratio of the interaction area of the predicted and actual bounding boxes and their union area. This metrics is based on Jacquard Index and is used in VOC dataset.
+
+![interction](https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Intersection_of_sets_A_and_B.svg/314px-Intersection_of_sets_A_and_B.svg.png)
+![union](https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Union_of_sets_A_and_B.svg/314px-Union_of_sets_A_and_B.svg.png)
+
+The graph below shows the distribution of IOU between the actual and predicted bounding boxes. The localization result is actuall quite good.
+
+![IOU histogram](/assets/kaggle-right-whale/bounding_box_iou.png)
+
+Below are samples of cropped images from the test set.
+
+![Sample of cropped image from the test set](/assets/kaggle-right-whale/bounding_box_test_sample.png)
+
+#### Classifier
+
+The classifier for this approach is again a VGG-net on cropped 256x256 images.
+
+Ultimately this approach led to a validation score of about ~5.2, which is better than the naive approach but this is not a significant improvement.
+
+### 4.3 Whale Facial Aligner
+
+Similar to my previous approach, an aligner is trained to allow the classifier to easily learn whale discriminating feature. But instead of using bounding box as target, the whale’s bonnet and blowhard are the target.
+
+[Architecture]
+
+The head crop is then extracted by applying an affine transform such that the blowhead and bonnet end up in similar position. This is made possible by the annotation from Anil Thomas.
+
+[GIF of all aligned whale]
+
+While the architecture looks very similar to the previous approach, the fact that the image is aligned has huge implication for the classifier - **the classifier no longer need to learn features which are invariant to extreme translation and rotation**. For example, if a whale has a unique white patch near its blowhead, the white patch will always be in the right half of the image!
+
+This reminds me of the Facebook’s DeepFace paper. DeepFace is a human face recognition system and its pre-processing step is to 3D “frontalize” the face image. They also employs locally connected convolutional layer, which different filters are learned at different locations.
+
+[DeepFace architecture]
+
+#### Aligner
+
+The aligner is again a VGG-style network and its target is normalized x, y-coordinates of the bonnet and blowhead. Inspired by the recent papers related to face image recognition, I replaced the 2 stacks of fully connected layers with a global averaging layer, and use stride=2 convolution instead of max-pooling when reducing feature maps size.
+
+Heavy data augmentation is applied to prevent overfitting, including rotation, translation, shearing and brightness adjustment. Note that the target coordiantes needs to be adjusted accordingly too. This can be done by simply applying the affine transformation matrix to the coordinates.
+
+Since the aligner tries to minimize the MSE, I observed similar slow convergence after about 10% of the training time.
+
+#### Classifier
+
+The classifier I used in this approach is a similar 19-layers VGG-net. I carried over the global averaging layer and stride=2 as max-pooling. What different is that **minimal augmentation** is applied because both the training and testing images will be aligned. I empirically found that heavy augmentation prevents the network to converge, and lighter augmentation does not lead to overfitting. This agrees with my theory.
+
+Remember the noob mistake I mentioned at the start about making a local validation set? It turns out I randomly selected 20% of images for the aligner and 15% of data for the classifier. This means some validation images for the classifier is part of the training set of the aligner and vice verse! This led to huge problems in validating classifier results, and I resort to relying on the public leaderboard for validation! So lesson learned: Split your dataset right at the start and store your split separately!
+
+This approach was implemented 3 weeks before the deadline. The first model trained with this approach without hyper-parameter optimization yields a leaderboard score of 1.9. Good for a top-10 finish!
+
+## 5. Experimentations
+
+2 weeks before the deadline, I started to experiment the state-of-the-art neural network structures. Some of them ended up being used in the final submission.
+
+### 5.1 Deep Residual Network (ResNet)
+
+The success of deep learning is usually attributed to the highly non-linear nature of stacks of layers. However the ResNet authors observed that counter-intuitive fact that simply adding more layers to a neural network will increases training error. They hypothesize that it is easier to encourage the network to learn the "residual error" instead of the original mapping.
+
+[ResNet shortcut diagram]
+
+Their 200-layer ResNet won the 1st place in the ILSVRC classification last year. I highly recommend reading the [original paper](http://arxiv.org/pdf/1512.03385v1.pdf). I personally think that this idea might be a 2nd boom to field of computer vision since 2012.
+
+The first ResNet-based network I experimented with was somewhat similar to the paper’s CIFAR10 network with n=3, resulting in 19 layers with 9 shortcut layers. I chose the CIFAR10 network structure first because a) I need to verify if my implementation is correct at all. b) this classifier will be feed with aligned whale crop image and should not require a huge network.
+
+I’d like to emphasize here my ResNet implementation is my own interpretation and might not be correct at all and consistent with the original author’s implementation.
+
+I then tried to replicate the 50-layer version with bottlenecking (see Table 1). Perhaps to to no surprise, this configuration overfits very quickly possibly due to the “width” of the network. I followed the advice of the authors in section 4.2. and reduced the number of filters, and the network overfits much later in the training process. Later I turned back on dropout on the after the global pooling layer and found that it helped prevent overfitting significant. In fact, I found that dropout higher than 0.5 (e.g. 0.8) improves the validation score even more.
+
+Interestingly I found that using the ADAM optimizer instead of SGDn leads to more stable validation loss. Comparing to the 19-layer VGG-net, the 66-layer ResNet is faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of the difference of learning rate.
+
+Overall, I feel that there is still a lot of room to explore to best apply residual training to neural network. For example, if residual learning is so effective, would learning the residual of the residual error be even more effective (shortcut of shortcuts)? Why does the optimizer has difficulty learning the original mapping in the first place? Can we combine ResNet with Highway Network? If the degradation problem is largely overcome, are the existing regularization techniques (maxout, dropout, l2 etc.) still applicable?
+
+The 19-layer ResNet and the 50-layer ResNet were used in the final submission.
+
+### 5.2 Inception v3
+
+Following the success of ResNet, I decided to
+
+### 5.3 Scaling training horizontally and Idea Validation
+
+Because of my late start, the neural network training duration became a huge problem. Most model used for submission took at least 36 hours to fully converge. So I bought an old GTX670 to optimize the hyper-parameter for the aligner, while I use my main GTX980Ti for the classifier.
+
+In fact, I find having additional graphics card much more helpful than having a faster graphics card. So one week before the deadline, I figured out a system that allows me to easily train a model in AWS EC2 g2.xlarge.
+
+I ended up with a system which allows me to train a model on g2.xlarge as if I am training it locally, by running this command.
+
+    eval “$(docker-machine env aws0x)”
+    docker run -ti \
+        -d \
+        --device /dev/nvidia0:/dev/nvidia0 \
+        --device /dev/nvidiactl:/dev/nvidiactl \
+        --device /dev/nvidia-uvm:/dev/nvidia-uvm \
+        -v /mnt/kaggle-right-whale/cache:/kaggle-right-whale/cache \
+        -v /mnt/kaggle-right-whale/models:/kaggle-right-whale/models \
+        felixlaumon/kaggle-right-whale \
+        ./scripts/train_model.py --model … --data --use_cropped --continue_training
+
+The model definitios are built as part of the container. The whale image are uploaded to S3 from my local machine when necessary and is mounted inside the container. The trained models are then synced back to the S3 every minute and then are synced back to my local machine.
+
+There are still quite a lot of quirks to be worked out. But this system allowed me to optimize the neural network hyper-parameter that would have taken a month locally. Most importantly, I feel more “free” to try out more far-fetched ideas without slowing down on-going model training. At peak, 6 models were training at the same time. Without this system, I would not be able to make an ensemble in time.
+
+## 6. Unimplemented Approaches
+
+Here are some more ideas that I was not able to squeeze out enough time to implement. I think some of them should yields significant improvements.
+
+### 1. Reposing the problem to generate more training data
+
+As mentioned before, one of the main challenge is the uneven distribution of image per whale. To avoid this problem, we can first repose the task to identify if a pair of image are the same whale or not. Then we train a classifier to learn the mapping of the whale image into a compact feature vectors. The objective of the classifier is to maximize the euclidean distance of images that contains the difference whales, and minimize the distance with same whales. This idea is largely based on (FaceNet)[http://arxiv.org/pdf/1503.03832v3.pdf].
+
+I briefly experimented with this approach with a pseudo-siamese network with the contrastive loss function, but wasn’t able to converge even with aligned head cropped image. The network was feeded with pairs of images which half of paris are the same whale and half of them are different. I suspect that the online triplet image mining used by FaceNet is actually essentially convergence.
+
+### 2. Joint Training of Whale Localization and Recognition
+
+- Spatial Transformer
+
+### 3. Transferred Learning
+
+- Reduce training time
+- Network might have vastly different structure
+- Combining with 6.1, apply embedding to the test size to generate label. Should
+be better than psuedo-labelling?
+
+
+### 4. Miscellaneous ideas and Open questions
+
+- Locally connected convolutional layer
+- How does one optimize the network structure in a more efficient way
+
+## 7. More exploration
+
+Not necessary to improve score
+
+- t-sne 
+
+
+  </div>
+
+  
+
+</article>
+
+<!-- mathjax -->
+
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li><a href="mailto:felixlaumon@gmail.com">felixlaumon@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/felixlaumon"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">felixlaumon</span></a>
+
+          </li>
+          
+
+          
+          <li>
+            <a href="https://twitter.com/phelixlau"><span class="icon icon--twitter"><svg viewBox="0 0 16 16"><path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/></svg>
+</span><span class="username">phelixlau</span></a>
+
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
