@@ -5,8 +5,8 @@
     <description></description>
     <link>http://felixlaumon.github.io/</link>
     <atom:link href="http://felixlaumon.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 10 Jan 2016 04:48:52 +0800</pubDate>
-    <lastBuildDate>Sun, 10 Jan 2016 04:48:52 +0800</lastBuildDate>
+    <pubDate>Sun, 10 Jan 2016 17:35:43 +0800</pubDate>
+    <lastBuildDate>Sun, 10 Jan 2016 17:35:43 +0800</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -152,7 +152,7 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 &lt;p&gt;Ultimately this approach led to a validation score of about ~5, which was better than the naive approach but still not a significant improvement.&lt;/p&gt;
 
-&lt;p&gt;I experimented with the amount of padding around the predicted bounding box and found that it did not effect on accuracy.&lt;/p&gt;
+&lt;p&gt;I experimented with the amount of padding around the predicted bounding box and found that it did not affect accuracy.&lt;/p&gt;
 
 &lt;hr /&gt;
 
@@ -368,7 +368,7 @@ docker run -ti \
 
 &lt;h3 id=&quot;pre-training&quot;&gt;7.4 Pre-training&lt;/h3&gt;
 
-&lt;p&gt;Pre-training the classifier with test images might have helped because the &lt;strong&gt;testing set had more images than the training set&lt;/strong&gt;. Combining with section 6.1, we could even &lt;strong&gt;apply the learned embedding to the test set to generate labels&lt;/strong&gt;. I expected this might lead to better result than &lt;strong&gt;pseudo-labelling.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Pre-training the classifier with test images might have helped because the &lt;strong&gt;testing set had more images than the training set&lt;/strong&gt;. Combining with section 7.1, we could even &lt;strong&gt;apply the learned embedding to the test set to generate labels&lt;/strong&gt;. I expected this might lead to better result than &lt;strong&gt;pseudo-labelling.&lt;/strong&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
 

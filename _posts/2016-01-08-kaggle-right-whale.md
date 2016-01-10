@@ -147,7 +147,7 @@ The classifier for this approach was again a OxfordNet trained on cropped 256x25
 
 Ultimately this approach led to a validation score of about ~5, which was better than the naive approach but still not a significant improvement.
 
-I experimented with the amount of padding around the predicted bounding box and found that it did not effect on accuracy.
+I experimented with the amount of padding around the predicted bounding box and found that it did not affect accuracy.
 
 ---
 
@@ -361,7 +361,7 @@ I investigated briefly with **[Net2Net](http://arxiv.org/pdf/1511.05641v2.pdf)**
 
 ### 7.4 Pre-training
 
-Pre-training the classifier with test images might have helped because the **testing set had more images than the training set**. Combining with section 6.1, we could even **apply the learned embedding to the test set to generate labels**. I expected this might lead to better result than **pseudo-labelling.**
+Pre-training the classifier with test images might have helped because the **testing set had more images than the training set**. Combining with section 7.1, we could even **apply the learned embedding to the test set to generate labels**. I expected this might lead to better result than **pseudo-labelling.**
 
 ---
 

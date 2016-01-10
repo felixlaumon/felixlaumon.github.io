@@ -219,7 +219,7 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <p>Ultimately this approach led to a validation score of about ~5, which was better than the naive approach but still not a significant improvement.</p>
 
-<p>I experimented with the amount of padding around the predicted bounding box and found that it did not effect on accuracy.</p>
+<p>I experimented with the amount of padding around the predicted bounding box and found that it did not affect accuracy.</p>
 
 <hr />
 
@@ -435,7 +435,7 @@ docker run -ti \
 
 <h3 id="pre-training">7.4 Pre-training</h3>
 
-<p>Pre-training the classifier with test images might have helped because the <strong>testing set had more images than the training set</strong>. Combining with section 6.1, we could even <strong>apply the learned embedding to the test set to generate labels</strong>. I expected this might lead to better result than <strong>pseudo-labelling.</strong></p>
+<p>Pre-training the classifier with test images might have helped because the <strong>testing set had more images than the training set</strong>. Combining with section 7.1, we could even <strong>apply the learned embedding to the test set to generate labels</strong>. I expected this might lead to better result than <strong>pseudo-labelling.</strong></p>
 
 <hr />
 
