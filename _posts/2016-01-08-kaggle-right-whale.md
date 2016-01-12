@@ -380,3 +380,5 @@ The source code is unfortunately very messy in its current state so it might tak
 If you have any questions or feedback, please leave a comment below.
 
 Follow me on [Twitter @phelixlau](https://twitter.com/phelixlau).
+
+If you are interested in solving challenging problems like this one, my employer [Alvanon](http://alvanon.com) is hiring Data Scientist and Software Developer at the Hong Kong office. You should check out the details at [http://alvanon.com/careers/](http://alvanon.com/careers/) and concact [kevin.campbell@alvanon.com](mailto:kevin.campbell@alvanon.com).
