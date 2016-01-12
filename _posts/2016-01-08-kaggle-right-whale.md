@@ -96,7 +96,7 @@ The network was trained with heavy data augmentation, including rotation, transl
 
 **Very leaky rectified linear unit (VLeakyReLU)** was used for all of the models.
 
-This naive approach yielded a validation score of just ~5.8 which was barely better than a random guess. This surprised me because I expected the network to be able to focus on the whale given the non-cluttered background. My hypothesis for the low score was that the **whale labels did not provide a strong enough training signal in this relatively small dataset**.
+This naive approach yielded a validation score of just ~5.8 (logloss, lower the better) which was barely better than a random guess. This surprised me because I expected the network to be able to focus on the whale given the non-cluttered background. My hypothesis for the low score was that the **whale labels did not provide a strong enough training signal in this relatively small dataset**.
 
 To prove my hypothesis, I looked at the **saliency map** of the neural network that is analogous to eye tracking. This was done by sliding a black box around the image and keeping track of the probability changes.
 
@@ -123,7 +123,7 @@ This is made possible thanks to the [annotations by Vinh Nguyen](https://www.kag
 I treated the localization problem as a **regression** problem, so that the objective of the localizer CNN is to **minimize the mean squared error (MSE) between the predicted and actual bounding box**. The bounding boxes were represented by x, y, width and height and were normalized into (0, 1) by dividing with the image size.
 
 Similar to the baseline model, the network structure is based on OxfordNet. Data
-augmentation was applied to the images as well. To calculate the bounding box of the transformed image, I created a boolean mask denoting the bounding box, and then applied the transformation to this mask. The augmented bounding box were calculated by the transformed mask.
+augmentation was applied to the images as well. To calculate the bounding box of the transformed image, I created a boolean mask denoting the bounding box, applied the transformation to this mask, and extracted the normalized bounding box from the mask. See diagram below for details.
 
 ![Bounding Box Augmentation](/assets/kaggle-right-whale/bounding_box_augmentation.png)
 
@@ -153,17 +153,17 @@ I experimented with the amount of padding around the predicted bounding box and 
 
 ### 4.3 Whale Head Aligner
 
-At this point, it was clear that the **main performance bottleneck is that the classifier was not able to focus on the actual discriminating part of the whales (i.e. the callosity pattern)**. So in this approach, a new **aligner replaced the localizer**. Particularly aligner rotate the images so the whale **bonnet is always right to the blowhead**.
+At this point, it was clear that the **main performance bottleneck is that the classifier was not able to focus on the actual discriminating part of the whales (i.e. the callosity pattern)**. So in this approach, a new **aligner replaced the localizer**. Particularly, the aligner rotated the images so the whale's **bonnet would be always to the right the blowhead** in the cropped image.
 
 ![Whale Facial Aligner](/assets/kaggle-right-whale/aligner_localization_approach.png)
 
 The head-cropped images were extracted by applying an affine transformation according to the predicted coordinates. This was made possible by the [annotations from Anil Thomas](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17555/try-this).
 
-While the architecture looked very similar to the previous approach, the fact that the images were aligned had a huge implication for the classifier -- **the classifier no longer need to learn features which are invariant to extreme translation and rotation**. However note that the aligned image were still not normalized by camera perspective, occlusion and exposure etc.
+While the architecture of this approach looked very similar to the previous one, the fact that the images were aligned had a huge implication for the classifier -- **the classifier no longer need to learn features which are invariant to extreme translation and rotation**. However note that the aligned image were still not normalized by camera perspective, occlusion and exposure etc.
 
 This approach somewhat reminded me of the Facebook’s **[DeepFace](https://www.cs.toronto.edu/~ranzato/publications/taigman_cvpr14.pdf)** paper. DeepFace is a human face recognition system and it applied **3D frontalization** to the face image before feeding it to the neural network. Obviously, it was not possible to perform similar alignment with just 2 points, but it was reasonable to assume that accuracy can be improved if there were more more annotation keypoints, as that would allow more non-linear transformation.
 
-They also employed locally-connected convolutional layers, which different filters were learned at different pixel locations. However I did not ended up using the locally-connected convolutional layer in my models because simply the implementation in [TheanoLinear](https://github.com/jaberg/TheanoLinear) doesn't seem to be compatible the Theano version I am using. 
+They also employed locally-connected convolutional layers, which different filters were learned at different pixel locations. However I did not ended up using the locally-connected convolutional layers in my models because simply the implementation in [TheanoLinear](https://github.com/jaberg/TheanoLinear) doesn't seem to be compatible the Theano version I am using. 
 
 ![DeepFace's 3D frontalization](/assets/kaggle-right-whale/deepface_3d_frontalization.png)
 
@@ -171,7 +171,7 @@ They also employed locally-connected convolutional layers, which different filte
 
 The aligner was again a OxfordNet-style network and its target was normalized x, y-coordinates of the bonnet and blowhead. Inspired by the recent papers related to face image recognition, I replaced the 2 stacks of fully connected layers with a global averaging layer, and used stride=2 convolution instead of max-pooling when reducing feature maps size. I also started to apply **batch-normalization** everywhere.
 
-Heavy data augmentation was applied to prevent overfitting, including rotation, translation, shearing and brightness adjustment. Note that the target coordinates needed to be adjusted accordingly too. This could be done by simply applying the affine transformation matrix to the coordinates.
+Heavy data augmentation was applied to prevent overfitting, which included rotation, translation, shearing and brightness adjustment. Note that the target coordinates needed to be adjusted accordingly too. This could be done by simply applying the affine transformation matrix to the coordinates.
 
 Since the aligner was optimized with the MSE objective function similar to the previous approach, I observed similar slow convergence after about 10% of the training time.
 
@@ -191,7 +191,7 @@ Remember the noob mistake I mentioned at the start about making a local validati
 
 ### 5.1 Deep Residual Network (ResNet)
 
-The success of deep learning is usually attributed to the highly non-linear nature of neural network with stacks of layers. However the [ResNet](http://arxiv.org/pdf/1512.03385v1.pdf) authors observed an counter-intuitive phenomenon -- simply adding more layers to a neural network will increase training error. They hypothesized that it was easier to encourage the network to learn the "residual error" instead of the original mapping.
+The success of deep learning is usually attributed to the highly non-linear nature of neural network with stacks of layers. However the [ResNet](http://arxiv.org/pdf/1512.03385v1.pdf) authors observed an counter-intuitive phenomenon -- simply adding more layers to a neural network will increase training error. They hypothesized that it would be effective to encourage the network to learn the "residual error" instead of the original mapping.
 
 ![ResNet comparison](/assets/kaggle-right-whale/resnet.png)
 
@@ -201,7 +201,7 @@ The first ResNet-based network I experimented with was somewhat similar to the p
 
 I’d like to emphasize here **my ResNet implementation was my own interpretation and might not be correct at all** and might not be consistent with the original authors' implementation.
 
-I then tried to replicate the **50-layer ResNet with bottlenecking** (see Table 1 of the paper). This configuration overfitted very quickly possibly due to the "width" of the network. So I followed the advice of the authors in section 4.2 and regularize the network by reducing the number of filters, and the network overfitted much later in the training process. I did not use bottlenecking after this point the filter sizes were not big.
+I then tried to replicate the **50-layer ResNet with bottlenecking** (see Table 1 of the paper). This configuration overfitted very quickly possibly due to the "width" of the network. So I followed the advice in section 4.2 and regularized the network by reducing the number of filters, and the network overfitted much later in the training process. I did not use bottlenecking after this point the filter sizes were not big.
 
 Later I turned dropout back on and found that it helped prevent overfitting significantly. In fact I found that dropout higher than 0.5 (e.g. 0.8) improves the validation score even more.
 
@@ -263,7 +263,7 @@ l = nn.layers.DropoutLayer(l, name='gpdrop', p=0.8)
 l = nn.layers.DenseLayer(l, name='out', num_units=n_classes, nonlinearity=nn.nonlinearities.softmax)
 {% endhighlight %}
 
-Interestingly comparing with SGD, the ADAM optimizer led to more stable validation loss. Also, comparing to the 19-layer OxfordNet, the 67-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rate.
+Interestingly comparing with SGD, the ADAM optimizer led to more stable validation loss. Also, comparing to the 19-layer OxfordNet, the 67-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rates.
 
 At the end, I still had a lot of questions about how to best apply residual training to neural network. For example, if residual learning is so effective, would learning the residual of the residual error be even more effective (shortcut of shortcut layer)? Why does the optimizer has difficulty learning the original mapping in the first place? Can we combine ResNet with Highway Network? If the degradation problem is largely overcome, are the existing regularization techniques (maxout, dropout, l2 etc.) still applicable?
 
@@ -279,7 +279,7 @@ I did not ended up using the Inception network in the final ensemble.
 
 Because of my late start, the neural network training duration became a huge problem. Most models used for submission **took at least 36 hours to fully converge**. So I bought an old GTX670 to optimize the hyperparameter for the aligner, while I use my main GTX980Ti for the classifier.
 
-I found that having **additional graphics card much more helpful than having a faster graphics card**. So one week before the deadline, I hacked together a system that allowed me to easily **train a model on AWS EC2 GPU instances (g2.xlarge) as if I was training it locally**, by running this command.
+I found that having **additional graphics card was much more helpful than having a faster graphics card**. So one week before the deadline, I hacked together a system that allowed me to easily **train a model on AWS EC2 GPU instances (g2.xlarge) as if I was training it locally**, by running this command.
 
     eval “$(docker-machine env aws0x)”
     docker run -ti \
@@ -296,7 +296,7 @@ The model definitions were built as part of the container image. The whale image
 
 There are still quite a lot of quirks to be worked out. But this system allowed me to **optimize the neural network hyperparameters that would have taken one month locally**. Most importantly, I felt more "free" to **try out more far-fetched ideas without slowing down ongoing model training**. At peak, 6 models were training at the same time. Without this system, I would not be able to make an ensemble used in the final submission in time.
 
-I believed this could be quite handy to other Kaggle competitions that requires neural network training such as Image recognition. Let me know if you were interested, and I could clean up my code for this part.
+I believed this could be quite handy to other Kaggle competitions that requires neural network training. Let me know if you were interested, and I could clean up my code for this part.
 
 ---
 
@@ -313,7 +313,7 @@ The outputs of the **global averaging layer** were extracted and a simple **logi
 
 I tried to perform PCA to reduce the dimensionality of the extracted features but found no improvements to the validation score.
 
-A funny sidenote -- 24 hours before the final deadline, I discovered that the logistic regression classifier was overfitting horrendously because the model accuracy on the training set was 100% and logloss 0. I was in full-on panic mode for the next 12 hours because I thought something must have gone horribly wrong. Later I realized that the features were extracted with all non-deterministic layers turned off (esp. the p=0.8 dropout layer), and that was why it did not match the training loss (which was measured with dropout turned on). I wondered if monitoring training loss without dropout turned off would be an useful way to see if the network was overfittng or not.
+A funny sidenote -- 24 hours before the final deadline, I discovered that the logistic regression classifier was overfitting horrendously because the model accuracy on the training set was 100% and logloss was 0. I was in full-on panic mode for the next 12 hours because I thought something must have gone horribly wrong. Later I realized that the features were extracted with all non-deterministic layers turned off (esp. the p=0.8 dropout layer), and that was why it did not match the training loss (which was measured with dropout turned on). I wondered if monitoring training loss without dropout turned off would be an useful way to see if the network was overfittng or not.
 
 ---
 
@@ -337,7 +337,7 @@ I briefly tried to apply **[Spatial Transformer Network](http://arxiv.org/pdf/15
 
 ![ST-CNN architecture](/assets/kaggle-right-whale/st_cnn.png)
 
-I was particularly confident that ST-CNN would work well because it achieved **start-of-the-art performance on the CUB-200-2011 bird classification** dataset using multiple localizers. (Arguably bird classification is much less fine grained than whale recognition. e.g. colors of birds of different species vary a lot, but not for whales)
+I was particularly confident that ST-CNN would work well because it achieved **start-of-the-art performance on the CUB-200-2011 bird classification** dataset using multiple localizers. (Arguably bird classification is much less fine grained than whale recognition. e.g. colors of birds of different species vary a lot, but not for whales). The diagram below shows samples from the bird dataset, and where the localizers focussed onto.
 
 ![ST-CNN localizer results](/assets/kaggle-right-whale/st_cnn_birds.png)
 
@@ -345,7 +345,7 @@ The first ST-CNN model was trained with 512x512 images and unfortunately, it was
 
 So in my next attempt, I tried to **supervise the localization net by adding a crude error term to the objective function** -- the MSE of the predicted affine transformation matrix and the actual matrix generated by the bonnet and blowhead annotation. Unfortunately, I was not able to compile this network with Theano.
 
-So it remained an open question for me -- **Can localization network of ST-CNN be trained in a supervised manner? Will semi-supervised training further improve the performance of ST-CNN or not.**
+So it remained an open question for me -- **Can localization network of ST-CNN be trained in a supervised manner? Will semi-supervised training further improve the performance of ST-CNN?**
 
 One approach I did not try was 1) **pre-train localization network** to learn the affine transformation that would align the image to the whale's blowhead and bonnet, 2) follow normal procedure to train the whole ST-CNN. Perhaps in the 2nd stage, the learning rate must be reduced to prevent the localizer from drifting away from whale head. It might also be a good idea to pretrain the classification part as well to prevent the need of manually adjusting the learning rate altogether. This is something I would have attempted if I had more time.
 
@@ -371,7 +371,7 @@ I had a lot of fun working on this challenge, and I learned a lot when trying to
 
 I'd like to congratulate other winners and other top performing teams and contestants. I am still amazed by the progress we made in the leaderboard in the last 3 weeks!
 
-I strongly encourage you to check out the [competition forum](https://www.kaggle.com/c/noaa-right-whale-recognition/forums) as they have been many alternative approaches shared throughout the competition. In particular, I am surprised by the number of non-deep-learning approach with localizing the whale! e.g. [unsupervised physics based whale detector](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17921/physics-based-unsupervised-whale-detector), [detector based on principle components of color channel](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/18251/another-whale-detector), [histogram similarity](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17473/finding-the-whale-by-histogram-similarity), [mask based regression](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/16684/alternative-approaches-to-whale-localization)
+I strongly encourage you to check out the [competition forum](https://www.kaggle.com/c/noaa-right-whale-recognition/forums) as there have been many alternative approaches shared throughout the competition. In particular, I am surprised by the number of non-deep-learning approach with localizing the whale! e.g. [unsupervised physics based whale detector](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17921/physics-based-unsupervised-whale-detector), [detector based on principle components of color channel](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/18251/another-whale-detector), [histogram similarity](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17473/finding-the-whale-by-histogram-similarity), [mask based regression](https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/16684/alternative-approaches-to-whale-localization)
 
 Finally, I'd like to thank Kaggle for hosting this compeitition, and MathWorks for sponsoring and providing a free copy of MATLAB for all participants. Of course this was not possible without NOAA releasing this rare dataset and the huge effort from Christin Khan and Leah Crowe for hand labelling the images! I hope we will see more datasets from NOAA? ;)
 
