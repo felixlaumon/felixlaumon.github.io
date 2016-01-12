@@ -273,9 +273,9 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <p>I’d like to emphasize here <strong>my ResNet implementation was my own interpretation and might not be correct at all</strong> and might not be consistent with the original authors’ implementation.</p>
 
-<p>I then tried to replicate the <strong>50-layer ResNet with bottlenecking</strong> (see Table 1 of the paper). This configuration overfitted very quickly possibly due to the “width” of the network. So I followed the advice in section 4.2 and regularized the network by reducing the number of filters, and the network overfitted much later in the training process. I did not use bottlenecking after this point the filter sizes were not big.</p>
+<p>I then tried to replicate the <strong>50-layer ResNet with bottlenecking</strong> (see Table 1 of the paper). This configuration overfitted very quickly possibly due to the “width” of the network. So I followed the advice in section 4.2 and regularized the network by <strong>reducing the number of filters</strong>, and the network overfitted much later in the training process. I did not use bottlenecking after this point the filter sizes were not big.</p>
 
-<p>Later I turned dropout back on and found that it helped prevent overfitting significantly. In fact I found that dropout higher than 0.5 (e.g. 0.8) improves the validation score even more.</p>
+<p>Later I turned dropout back on and found that it helped prevent overfitting significantly. In fact I found that <strong>dropout higher than 0.5</strong> (e.g. 0.8) improves the validation score even more.</p>
 
 <p>Near the end of the competition, I also successfully trained a <strong>very deep and very thin ResNet with 67 layers</strong>. Below is its model definition:</p>
 
@@ -333,13 +333,13 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">DenseLayer</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'out'</span><span class="p">,</span> <span class="n">num_units</span><span class="o">=</span><span class="n">n_classes</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">nonlinearities</span><span class="o">.</span><span class="n">softmax</span><span class="p">)</span></code></pre></figure>
 
-<p>Interestingly comparing with SGD, the ADAM optimizer led to more stable validation loss. Also, comparing to the 19-layer OxfordNet, the 67-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rates.</p>
+<p>Interestingly, comparing with SGD, the ADAM optimizer led to more stable validation loss. Also, comparing with the 19-layer OxfordNet, the 67-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rates.</p>
 
 <p>At the end, I still had a lot of questions about how to best apply residual training to neural network. For example, if residual learning is so effective, would learning the residual of the residual error be even more effective (shortcut of shortcut layer)? Why does the optimizer has difficulty learning the original mapping in the first place? Can we combine ResNet with Highway Network? If the degradation problem is largely overcome, are the existing regularization techniques (maxout, dropout, l2 etc.) still applicable?</p>
 
 <h3 id="inception-v3">5.2 Inception v3</h3>
 
-<p>Following the success I had with ResNet, I decided to also the replicate the other top performer of the ILSVRC challenge – <a href="http://arxiv.org/pdf/1512.00567v3.pdf">Inception v3</a>.</p>
+<p>Following the success I had with ResNet, I decided to also replicate the other top performer of the ILSVRC challenge – <a href="http://arxiv.org/pdf/1512.00567v3.pdf">Inception v3</a>.</p>
 
 <p>I tried to train the Inception net with no modification to the configuration at all except to add a dropout before the last layer, and no surprises it overfitted very quickly. Then I removed some of the “modules” to reduce its size, but I found the network still overfitted significantly. Note that I did not attempt to reduce the filter size because I was not sure how were the number of filters were derived in the first place.</p>
 
@@ -397,7 +397,7 @@ docker run -ti \
 
 <p><strong>If you attempted any of these approaches or have any suggestion, please leave a comment below as I am very interested in how these ideas could have been panned out.</strong></p>
 
-<h3 id="reposing-the-problem-to-generate-more-training-data">7.1. Reposing the Problem to Generate more training data</h3>
+<h3 id="reposing-the-problem-to-generate-more-training-data">7.1. Reposing the Problem to Generate More Training Data</h3>
 
 <p>As mentioned before, one of the main challenges was the uneven distribution of number of images per whale, and the limited number of images in general. To avoid this problem, we can first <strong>repose the task as to identify if a pair of images belong to the same whale or not</strong>. Then we can train a classifier to learn an <strong>embedding</strong> which maps the whale images into compact feature vectors. The objective of the classifier was to maximize the euclidean distance of the feature vectors that contains the different whales, and minimize the distance with same whales. This idea was largely based on <strong><a href="http://arxiv.org/pdf/1503.03832v3.pdf">FaceNet</a></strong>.</p>
 

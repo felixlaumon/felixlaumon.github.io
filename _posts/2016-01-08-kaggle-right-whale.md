@@ -201,9 +201,9 @@ The first ResNet-based network I experimented with was somewhat similar to the p
 
 I’d like to emphasize here **my ResNet implementation was my own interpretation and might not be correct at all** and might not be consistent with the original authors' implementation.
 
-I then tried to replicate the **50-layer ResNet with bottlenecking** (see Table 1 of the paper). This configuration overfitted very quickly possibly due to the "width" of the network. So I followed the advice in section 4.2 and regularized the network by reducing the number of filters, and the network overfitted much later in the training process. I did not use bottlenecking after this point the filter sizes were not big.
+I then tried to replicate the **50-layer ResNet with bottlenecking** (see Table 1 of the paper). This configuration overfitted very quickly possibly due to the "width" of the network. So I followed the advice in section 4.2 and regularized the network by **reducing the number of filters**, and the network overfitted much later in the training process. I did not use bottlenecking after this point the filter sizes were not big.
 
-Later I turned dropout back on and found that it helped prevent overfitting significantly. In fact I found that dropout higher than 0.5 (e.g. 0.8) improves the validation score even more.
+Later I turned dropout back on and found that it helped prevent overfitting significantly. In fact I found that **dropout higher than 0.5** (e.g. 0.8) improves the validation score even more.
 
 Near the end of the competition, I also successfully trained a **very deep and very thin ResNet with 67 layers**. Below is its model definition:
 
@@ -263,13 +263,13 @@ l = nn.layers.DropoutLayer(l, name='gpdrop', p=0.8)
 l = nn.layers.DenseLayer(l, name='out', num_units=n_classes, nonlinearity=nn.nonlinearities.softmax)
 {% endhighlight %}
 
-Interestingly comparing with SGD, the ADAM optimizer led to more stable validation loss. Also, comparing to the 19-layer OxfordNet, the 67-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rates.
+Interestingly, comparing with SGD, the ADAM optimizer led to more stable validation loss. Also, comparing with the 19-layer OxfordNet, the 67-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rates.
 
 At the end, I still had a lot of questions about how to best apply residual training to neural network. For example, if residual learning is so effective, would learning the residual of the residual error be even more effective (shortcut of shortcut layer)? Why does the optimizer has difficulty learning the original mapping in the first place? Can we combine ResNet with Highway Network? If the degradation problem is largely overcome, are the existing regularization techniques (maxout, dropout, l2 etc.) still applicable?
 
 ### 5.2 Inception v3
 
-Following the success I had with ResNet, I decided to also the replicate the other top performer of the ILSVRC challenge -- [Inception v3](http://arxiv.org/pdf/1512.00567v3.pdf).
+Following the success I had with ResNet, I decided to also replicate the other top performer of the ILSVRC challenge -- [Inception v3](http://arxiv.org/pdf/1512.00567v3.pdf).
 
 I tried to train the Inception net with no modification to the configuration at all except to add a dropout before the last layer, and no surprises it overfitted very quickly. Then I removed some of the "modules" to reduce its size, but I found the network still overfitted significantly. Note that I did not attempt to reduce the filter size because I was not sure how were the number of filters were derived in the first place.
 
@@ -323,7 +323,7 @@ Here are some more ideas that should yield significant score improvement. But I 
 
 **If you attempted any of these approaches or have any suggestion, please leave a comment below as I am very interested in how these ideas could have been panned out.**
 
-### 7.1. Reposing the Problem to Generate more training data
+### 7.1. Reposing the Problem to Generate More Training Data
 
 As mentioned before, one of the main challenges was the uneven distribution of number of images per whale, and the limited number of images in general. To avoid this problem, we can first **repose the task as to identify if a pair of images belong to the same whale or not**. Then we can train a classifier to learn an **embedding** which maps the whale images into compact feature vectors. The objective of the classifier was to maximize the euclidean distance of the feature vectors that contains the different whales, and minimize the distance with same whales. This idea was largely based on **[FaceNet](http://arxiv.org/pdf/1503.03832v3.pdf)**.
 
