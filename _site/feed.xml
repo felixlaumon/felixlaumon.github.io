@@ -5,8 +5,8 @@
     <description></description>
     <link>http://felixlaumon.github.io/</link>
     <atom:link href="http://felixlaumon.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 12 Jan 2016 12:38:55 +0800</pubDate>
-    <lastBuildDate>Tue, 12 Jan 2016 12:38:55 +0800</lastBuildDate>
+    <pubDate>Tue, 12 Jan 2016 12:41:22 +0800</pubDate>
+    <lastBuildDate>Tue, 12 Jan 2016 12:41:22 +0800</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -387,6 +387,8 @@ docker run -ti \
 &lt;p&gt;If you have any questions or feedback, please leave a comment below.&lt;/p&gt;
 
 &lt;p&gt;Follow me on &lt;a href=&quot;https://twitter.com/phelixlau&quot;&gt;Twitter @phelixlau&lt;/a&gt;.&lt;/p&gt;
+
+&lt;hr /&gt;
 
 &lt;p&gt;If you are interested in solving challenging problems like this one, my employer &lt;a href=&quot;http://alvanon.com&quot;&gt;Alvanon&lt;/a&gt; is hiring Data Scientist and Software Developer at the Hong Kong office. You should check out the details at &lt;a href=&quot;http://alvanon.com/careers/&quot;&gt;http://alvanon.com/careers/&lt;/a&gt; and concact &lt;a href=&quot;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#116;&amp;#111;:&amp;#107;&amp;#101;&amp;#118;&amp;#105;&amp;#110;&amp;#046;&amp;#099;&amp;#097;&amp;#109;&amp;#112;&amp;#098;&amp;#101;&amp;#108;&amp;#108;&amp;#064;&amp;#097;&amp;#108;&amp;#118;&amp;#097;&amp;#110;&amp;#111;&amp;#110;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&quot;&gt;&amp;#107;&amp;#101;&amp;#118;&amp;#105;&amp;#110;&amp;#046;&amp;#099;&amp;#097;&amp;#109;&amp;#112;&amp;#098;&amp;#101;&amp;#108;&amp;#108;&amp;#064;&amp;#097;&amp;#108;&amp;#118;&amp;#097;&amp;#110;&amp;#111;&amp;#110;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&lt;/a&gt;.&lt;/p&gt;
 </description>
