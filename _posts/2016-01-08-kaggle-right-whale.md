@@ -1,8 +1,8 @@
 ---
 layout: post
 date: 2015-01-08
-title: "Recognizing and Localizing Endagered Right Whale with Extremely Deep Neural Networks"
-except: "I participated in the Kaggle Right Whale recognition and finishes in the 2nd places. I'll explain my approach in this blog post"
+title: "Recognizing and Localizing Endangered Right Whale with Extremely Deep Neural Networks"
+except: "I participated in the Kaggle Right Whale recognition competition and finishes in the 2nd places. I'll explain my approach in this blog post"
 comments: true
 ---
 
@@ -10,7 +10,7 @@ In this post I'll share my experience and explain my approach for the [Kaggle Ri
 
 ## 1. Background
 
-[Right whale](https://en.wikipedia.org/wiki/Right_whale) is an endangered species with fewer than 500 left in the Atlantic Ocean. As part of an ongoing preservation effort, experienced marine scientists track them across the ocean to understand their behaviors, and monitor their health condition. The current process is quite time-consuming and laborious. It starts with photographing these whales during aerial surveys, selecting and importing the photos into a catalog, and finally the photos are compared against the known whales inside the catalog by trained researchers. Each right whale has unique callosity pattern on the whale head (see digram below). You can find more details at [the compeition page](https://www.kaggle.com/c/noaa-right-whale-recognition). The goal of the competition was to develop an automated process to identify the whales from aerial photos.
+[Right whale](https://en.wikipedia.org/wiki/Right_whale) is an endangered species with fewer than 500 left in the Atlantic Ocean. As part of an ongoing preservation effort, experienced marine scientists track them across the ocean to understand their behaviors, and monitor their health condition. The current process is quite time-consuming and laborious. It starts with photographing these whales during aerial surveys, selecting and importing the photos into a catalog, and finally the photos are compared against the known whales inside the catalog by trained researchers. Each right whale has unique callosity pattern on the whale head (see digram below). You can find more details at [the competition page](https://www.kaggle.com/c/noaa-right-whale-recognition). The goal of the competition was to develop an automated process to identify the whales from aerial photos.
 
 ![](https://teacheratsea.files.wordpress.com/2015/05/img_2292.jpg)
 

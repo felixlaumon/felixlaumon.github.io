@@ -5,17 +5,17 @@
     <description></description>
     <link>http://felixlaumon.github.io/</link>
     <atom:link href="http://felixlaumon.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 12 Jan 2016 22:42:18 +0800</pubDate>
-    <lastBuildDate>Tue, 12 Jan 2016 22:42:18 +0800</lastBuildDate>
+    <pubDate>Wed, 13 Jan 2016 16:26:10 +0800</pubDate>
+    <lastBuildDate>Wed, 13 Jan 2016 16:26:10 +0800</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
-        <title>Recognizing and Localizing Endagered Right Whale with Extremely Deep Neural Networks</title>
+        <title>Recognizing and Localizing Endangered Right Whale with Extremely Deep Neural Networks</title>
         <description>&lt;p&gt;In this post I’ll share my experience and explain my approach for the &lt;a href=&quot;https://www.kaggle.com/c/noaa-right-whale-recognition&quot;&gt;Kaggle Right Whale&lt;/a&gt; challenge. I managed to finish in 2nd place.&lt;/p&gt;
 
 &lt;h2 id=&quot;background&quot;&gt;1. Background&lt;/h2&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Right_whale&quot;&gt;Right whale&lt;/a&gt; is an endangered species with fewer than 500 left in the Atlantic Ocean. As part of an ongoing preservation effort, experienced marine scientists track them across the ocean to understand their behaviors, and monitor their health condition. The current process is quite time-consuming and laborious. It starts with photographing these whales during aerial surveys, selecting and importing the photos into a catalog, and finally the photos are compared against the known whales inside the catalog by trained researchers. Each right whale has unique callosity pattern on the whale head (see digram below). You can find more details at &lt;a href=&quot;https://www.kaggle.com/c/noaa-right-whale-recognition&quot;&gt;the compeition page&lt;/a&gt;. The goal of the competition was to develop an automated process to identify the whales from aerial photos.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Right_whale&quot;&gt;Right whale&lt;/a&gt; is an endangered species with fewer than 500 left in the Atlantic Ocean. As part of an ongoing preservation effort, experienced marine scientists track them across the ocean to understand their behaviors, and monitor their health condition. The current process is quite time-consuming and laborious. It starts with photographing these whales during aerial surveys, selecting and importing the photos into a catalog, and finally the photos are compared against the known whales inside the catalog by trained researchers. Each right whale has unique callosity pattern on the whale head (see digram below). You can find more details at &lt;a href=&quot;https://www.kaggle.com/c/noaa-right-whale-recognition&quot;&gt;the competition page&lt;/a&gt;. The goal of the competition was to develop an automated process to identify the whales from aerial photos.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;https://teacheratsea.files.wordpress.com/2015/05/img_2292.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
