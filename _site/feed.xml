@@ -5,12 +5,12 @@
     <description></description>
     <link>http://felixlaumon.github.io/</link>
     <atom:link href="http://felixlaumon.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 13 Jan 2016 22:06:37 +0800</pubDate>
-    <lastBuildDate>Wed, 13 Jan 2016 22:06:37 +0800</lastBuildDate>
+    <pubDate>Thu, 14 Jan 2016 11:00:06 +0800</pubDate>
+    <lastBuildDate>Thu, 14 Jan 2016 11:00:06 +0800</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
-        <title>Recognizing and Localizing Endangered Right Whale with Extremely Deep Neural Networks</title>
+        <title>Recognizing and Localizing Endangered Right Whales with Extremely Deep Neural Networks</title>
         <description>&lt;p&gt;In this post I’ll share my experience and explain my approach for the &lt;a href=&quot;https://www.kaggle.com/c/noaa-right-whale-recognition&quot;&gt;Kaggle Right Whale&lt;/a&gt; challenge. I managed to finish in 2nd place.&lt;/p&gt;
 
 &lt;h2 id=&quot;background&quot;&gt;1. Background&lt;/h2&gt;
@@ -95,7 +95,7 @@ Human&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Virtually &lt;strong&gt;no image processing&lt;/strong&gt; is performed, except to resize them to 256x256 and stored as numpy memmap. I did not even perform zero mean unit variance normalization. Also the aspect ratio is not preserved during the resize. The target of the model was the whale name encoded to 0 and 447 as integer. The network architecture was based on &lt;strong&gt;OxfordNet&lt;/strong&gt;.&lt;/p&gt;
 
-&lt;p&gt;OxfordNet was the winner of the 2014 ImageNet challenge. It contained a series of stacks of small 3x3 convolutional filters immediately followed by max-pooling. The network usually ended with a few stacks of fully connected layers. See &lt;a href=&quot;http://arxiv.org/pdf/1409.1556v6.pdf&quot;&gt;original paper&lt;/a&gt; for details.&lt;/p&gt;
+&lt;p&gt;OxfordNet (or VGGNet)  was the winner of the 2014 ImageNet challenge. It contained a series of stacks of small 3x3 convolutional filters immediately followed by max-pooling. The network usually ended with a few stacks of fully connected layers. See &lt;a href=&quot;http://arxiv.org/pdf/1409.1556v6.pdf&quot;&gt;original paper&lt;/a&gt; for details.&lt;/p&gt;
 
 &lt;p&gt;The network was trained with heavy data augmentation, including rotation, translation, shearing and scaling. I also added &lt;strong&gt;“brightness” augmentation&lt;/strong&gt; to account for underexposed and overexposed images. I found that color permutation did not help, which made sense because there was not much color variation in the images.&lt;/p&gt;
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 date: 2015-01-08
-title: "Recognizing and Localizing Endangered Right Whale with Extremely Deep Neural Networks"
+title: "Recognizing and Localizing Endangered Right Whales with Extremely Deep Neural Networks"
 except: "I participated in the Kaggle Right Whale recognition competition and finishes in the 2nd places. I'll explain my approach in this blog post"
 comments: true
 ---
@@ -90,7 +90,7 @@ After deciding to participate in this competition, the first thing I did was to 
 
 Virtually **no image processing** is performed, except to resize them to 256x256 and stored as numpy memmap. I did not even perform zero mean unit variance normalization. Also the aspect ratio is not preserved during the resize. The target of the model was the whale name encoded to 0 and 447 as integer. The network architecture was based on **OxfordNet**.
 
-OxfordNet was the winner of the 2014 ImageNet challenge. It contained a series of stacks of small 3x3 convolutional filters immediately followed by max-pooling. The network usually ended with a few stacks of fully connected layers. See [original paper](http://arxiv.org/pdf/1409.1556v6.pdf) for details.
+OxfordNet (or VGGNet)  was the winner of the 2014 ImageNet challenge. It contained a series of stacks of small 3x3 convolutional filters immediately followed by max-pooling. The network usually ended with a few stacks of fully connected layers. See [original paper](http://arxiv.org/pdf/1409.1556v6.pdf) for details.
 
 The network was trained with heavy data augmentation, including rotation, translation, shearing and scaling. I also added **"brightness" augmentation** to account for underexposed and overexposed images. I found that color permutation did not help, which made sense because there was not much color variation in the images.
 

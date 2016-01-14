@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Recognizing and Localizing Endangered Right Whale with Extremely Deep Neural Networks</title>
+  <title>Recognizing and Localizing Endangered Right Whales with Extremely Deep Neural Networks</title>
   <meta name="description" content="In this post I’ll share my experience and explain my approach for the Kaggle Right Whale challenge. I managed to finish in 2nd place.">
 
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
@@ -73,7 +73,7 @@
         <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">Recognizing and Localizing Endangered Right Whale with Extremely Deep Neural Networks</h1>
+    <h1 class="post-title" itemprop="name headline">Recognizing and Localizing Endangered Right Whales with Extremely Deep Neural Networks</h1>
     <p class="post-meta"><time datetime="2015-01-08T00:00:00+08:00" itemprop="datePublished">Jan 8, 2015</time></p>
   </header>
 
@@ -162,7 +162,7 @@ Human" /></p>
 
 <p>Virtually <strong>no image processing</strong> is performed, except to resize them to 256x256 and stored as numpy memmap. I did not even perform zero mean unit variance normalization. Also the aspect ratio is not preserved during the resize. The target of the model was the whale name encoded to 0 and 447 as integer. The network architecture was based on <strong>OxfordNet</strong>.</p>
 
-<p>OxfordNet was the winner of the 2014 ImageNet challenge. It contained a series of stacks of small 3x3 convolutional filters immediately followed by max-pooling. The network usually ended with a few stacks of fully connected layers. See <a href="http://arxiv.org/pdf/1409.1556v6.pdf">original paper</a> for details.</p>
+<p>OxfordNet (or VGGNet)  was the winner of the 2014 ImageNet challenge. It contained a series of stacks of small 3x3 convolutional filters immediately followed by max-pooling. The network usually ended with a few stacks of fully connected layers. See <a href="http://arxiv.org/pdf/1409.1556v6.pdf">original paper</a> for details.</p>
 
 <p>The network was trained with heavy data augmentation, including rotation, translation, shearing and scaling. I also added <strong>“brightness” augmentation</strong> to account for underexposed and overexposed images. I found that color permutation did not help, which made sense because there was not much color variation in the images.</p>
 
