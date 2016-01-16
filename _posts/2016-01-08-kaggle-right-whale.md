@@ -2,7 +2,7 @@
 layout: post
 date: 2015-01-08
 title: "Recognizing and Localizing Endangered Right Whales with Extremely Deep Neural Networks"
-except: "I participated in the Kaggle Right Whale recognition competition and finishes in the 2nd places. I'll explain my approach in this blog post"
+except: "I participated in the Kaggle Right Whale recognition competition and finished in the 2nd places. I'll explain my approach in this blog post"
 comments: true
 ---
 
@@ -14,7 +14,7 @@ In this post I'll share my experience and explain my approach for the [Kaggle Ri
 
 ![](https://teacheratsea.files.wordpress.com/2015/05/img_2292.jpg)
 
-Image quality varies quite a bit because they were possibly taken in different years with different camera equipments. Note that some images were overexposed and some were underexposed. But in general, I find it very difficult to identify the whale myself with even using the highest quality images.
+Image quality varies quite a bit because they were possibly taken in different years with different camera equipments. Note that some images were overexposed and some were underexposed. But in general, I found it very difficult to identify the whale myself with even using the highest quality images.
 
 Here are 4 pairs of right whales, can you guess which ones are the same and which ones are not?
 
@@ -271,13 +271,13 @@ At the end, I still had a lot of questions about how to best apply residual trai
 
 Following the success I had with ResNet, I decided to also replicate the other top performer of the ILSVRC challenge -- [Inception v3](http://arxiv.org/pdf/1512.00567v3.pdf).
 
-I tried to train the Inception net with no modification to the configuration at all except to add a dropout before the last layer, and no surprises it overfitted very quickly. Then I removed some of the "modules" to reduce its size, but I found the network still overfitted significantly. Note that I did not attempt to reduce the filter size because I was not sure how were the number of filters were derived in the first place.
+I tried to train the Inception net with no modification to the configuration at all except to add a dropout before the last layer, and no surprises it overfitted very quickly. Then I removed some of the "modules" to reduce its size, but I found the network still overfitted significantly. Note that I did not attempt to reduce the filter size because I was not sure how the number of filters were derived in the first place.
 
 I did not ended up using the Inception network in the final ensemble.
 
 ### 5.3 Scaling training horizontally and Idea Validation
 
-Because of my late start, the neural network training duration became a huge problem. Most models used for submission **took at least 36 hours to fully converge**. So I bought an old GTX670 to optimize the hyperparameter for the aligner, while I use my main GTX980Ti for the classifier.
+Because of my late start, the lengthy neural network training process became a huge problem. Most models used for submission **took at least 36 hours to fully converge**. So I bought an old GTX670 to optimize the hyperparameter for the aligner, while I used my main GTX980Ti for the classifier.
 
 I found that having **additional graphics card was much more helpful than having a faster graphics card**. So one week before the deadline, I hacked together a system that allowed me to easily **train a model on AWS EC2 GPU instances (g2.xlarge) as if I was training it locally**, by running this command.
 
