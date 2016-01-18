@@ -296,7 +296,7 @@ The model definitions were built as part of the container image. The whale image
 
 There are still quite a lot of quirks to be worked out. But this system allowed me to **optimize the neural network hyperparameters that would have taken one month locally**. Most importantly, I felt more "free" to **try out more far-fetched ideas without slowing down ongoing model training**. At peak, 6 models were training at the same time. Without this system, I would not be able to make an ensemble used in the final submission in time.
 
-I believed this could be quite handy to other Kaggle competitions that requires neural network training. Let me know if you were interested, and I could clean up my code for this part.
+You can find the source code of this system on [Github (felixlaumon/docker-deeplearning)](https://github.com/felixlaumon/docker-deeplearning)
 
 ---
 
@@ -386,4 +386,4 @@ Follow me on [Twitter @phelixlau](https://twitter.com/phelixlau).
 
 ---
 
-If you are interested in solving challenging problems like this one, my employer [Alvanon](http://alvanon.com) is hiring Data Scientist and Software Developer at the Hong Kong office. You should check out the details at [http://alvanon.com/careers/](http://alvanon.com/careers/) and concact [kevin.campbell@alvanon.com](mailto:kevin.campbell@alvanon.com).
+If you are interested in solving challenging problems like this one, my employer [Alvanon](http://alvanon.com) is hiring Data Scientist and Software Developer at the Hong Kong office. You should check out the details at [http://alvanon.com/careers/](http://alvanon.com/careers/) and contact [kevin.campbell@alvanon.com](mailto:kevin.campbell@alvanon.com) and [felix.lau@alvanon.com](mailto:felix.lau@alvanon.com).
