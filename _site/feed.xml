@@ -5,8 +5,8 @@
     <description></description>
     <link>http://felixlaumon.github.io/</link>
     <atom:link href="http://felixlaumon.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 17 Jan 2016 00:20:35 +0800</pubDate>
-    <lastBuildDate>Sun, 17 Jan 2016 00:20:35 +0800</lastBuildDate>
+    <pubDate>Tue, 19 Jan 2016 00:40:55 +0800</pubDate>
+    <lastBuildDate>Tue, 19 Jan 2016 00:40:55 +0800</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -382,11 +382,13 @@ docker run -ti \
 
 &lt;p&gt;Finally, I’d like to thank Kaggle for hosting this compeitition, and MathWorks for sponsoring and providing a free copy of MATLAB for all participants. Of course this was not possible without NOAA releasing this rare dataset and the huge effort from Christin Khan and Leah Crowe for hand labelling the images! I hope we will see more datasets from NOAA? ;)&lt;/p&gt;
 
-&lt;p&gt;The source code is unfortunately very messy in its current state so it might take a while for me to clean it up. I will update this blog post once it is available!&lt;/p&gt;
-
 &lt;p&gt;If you have any questions or feedback, please leave a comment below.&lt;/p&gt;
 
 &lt;p&gt;Follow me on &lt;a href=&quot;https://twitter.com/phelixlau&quot;&gt;Twitter @phelixlau&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Update 1&lt;/strong&gt;: See further discussions about this blog post at &lt;a href=&quot;https://www.reddit.com/r/MachineLearning/comments/40hluu/recognizing_and_localizing_endagered_right_whale/&quot;&gt;r/machinelearning&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Update 2&lt;/strong&gt;: The source code is now available at &lt;a href=&quot;https://github.com/felixlaumon/kaggle-right-whale&quot;&gt;https://github.com/felixlaumon/kaggle-right-whale&lt;/a&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
 

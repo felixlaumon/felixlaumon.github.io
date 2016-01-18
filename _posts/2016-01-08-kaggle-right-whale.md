@@ -375,11 +375,14 @@ I strongly encourage you to check out the [competition forum](https://www.kaggle
 
 Finally, I'd like to thank Kaggle for hosting this compeitition, and MathWorks for sponsoring and providing a free copy of MATLAB for all participants. Of course this was not possible without NOAA releasing this rare dataset and the huge effort from Christin Khan and Leah Crowe for hand labelling the images! I hope we will see more datasets from NOAA? ;)
 
-The source code is unfortunately very messy in its current state so it might take a while for me to clean it up. I will update this blog post once it is available!
-
 If you have any questions or feedback, please leave a comment below.
 
 Follow me on [Twitter @phelixlau](https://twitter.com/phelixlau).
+
+**Update 1**: See further discussions about this blog post at [r/machinelearning](https://www.reddit.com/r/MachineLearning/comments/40hluu/recognizing_and_localizing_endagered_right_whale/)
+
+**Update 2**: The source code is now available at [https://github.com/felixlaumon/kaggle-right-whale](https://github.com/felixlaumon/kaggle-right-whale)
+
 
 ---
 
