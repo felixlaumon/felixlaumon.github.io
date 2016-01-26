@@ -313,7 +313,7 @@ The outputs of the **global averaging layer** were extracted and a simple **logi
 
 I tried to perform PCA to reduce the dimensionality of the extracted features but found no improvements to the validation score.
 
-A funny sidenote -- 24 hours before the final deadline, I discovered that the logistic regression classifier was overfitting horrendously because the model accuracy on the training set was 100% and logloss was 0. I was in full-on panic mode for the next 12 hours because I thought something must have gone horribly wrong. Later I realized that the features were extracted with all non-deterministic layers turned off (esp. the p=0.8 dropout layer), and that was why it did not match the training loss (which was measured with dropout turned on). I wondered if monitoring training loss without dropout turned off would be an useful way to see if the network was overfittng or not.
+A funny sidenote -- 24 hours before the final deadline, I discovered that the logistic regression classifier was overfitting horrendously because the model accuracy on the training set was 100% and logloss was 0. I was in full-on panic mode for the next 12 hours because I thought something must have gone horribly wrong. Later I realized that the features were extracted with all non-deterministic layers turned off (esp. the p=0.8 dropout layer), and that was why it did not match the training loss (which was measured with dropout turned on). I wondered if monitoring training loss without dropout turned off would be a useful way to see if the network was overfittng or not.
 
 ---
 
