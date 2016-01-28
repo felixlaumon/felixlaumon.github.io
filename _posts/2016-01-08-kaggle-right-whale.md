@@ -1,6 +1,6 @@
 ---
 layout: post
-date: 2016-01-08
+date: 2015-01-08
 title: "Recognizing and Localizing Endangered Right Whales with Extremely Deep Neural Networks"
 except: "I participated in the Kaggle Right Whale recognition competition and finished in the 2nd places. I'll explain my approach in this blog post"
 comments: true
