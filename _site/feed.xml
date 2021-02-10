@@ -5,15 +5,207 @@
     <description></description>
     <link>http://felixlaumon.github.io/</link>
     <atom:link href="http://felixlaumon.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 09 Feb 2016 03:44:35 +0800</pubDate>
-    <lastBuildDate>Tue, 09 Feb 2016 03:44:35 +0800</lastBuildDate>
-    <generator>Jekyll v3.0.1</generator>
+    <pubDate>Wed, 10 Feb 2021 00:31:21 -0800</pubDate>
+    <lastBuildDate>Wed, 10 Feb 2021 00:31:21 -0800</lastBuildDate>
+    <generator>Jekyll v4.2.0</generator>
+    
+      <item>
+        <title>Blocking Trypophobia-Triggering Images with Deep Learning — From Model Training To Deploying in Chrome</title>
+        <description>&lt;p&gt;&lt;strong&gt;TL;DR&lt;/strong&gt;: I curated a dataset of trypophobia-triggering images, trained models with
+TensorFlow, exported to Tensorflow.Js, and shipped it as a Chrome extension.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://chrome.google.com/webstore/detail/trypophobia-detection/jnomocmjhfnnimpbibmmhafbcbcnnjel?hl=en&amp;amp;authuser=0&quot;&gt;Install it now!&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/trypophobia-blocker/browser-google-image.png&quot; alt=&quot;Interface&quot; /&gt;
+&lt;em&gt;All trypophobia-triggering images are blocked in this Google Image search&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;what-is-trypophobia&quot;&gt;What is Trypophobia?&lt;/h3&gt;
+
+&lt;p&gt;Trypophobia is a specific phobia of a cluster of small holes. The most
+well-known trigger is lotus seedheads. In a relatively small study done in 2013,
+16% of the 286 participants experience discomfort when shown
+trypophobia-triggering photos.&lt;/p&gt;
+
+&lt;p&gt;Trypohobia is not a well-studied phenomenon so there is very little
+understanding of the cause and treatment. To make things worse, people on the
+Internet sometimes intentionally photoshop lotus seedhead or other
+trypophobia-triggering patterns to normal images. If you have trypophobia, it
+might be a nightmare to just browse the net because you never know when the
+dreaded lotus seedhead is going to show up. This chrome extension prevent users
+with trypophobia from exposing to these trypophobia-triggering images.&lt;/p&gt;
+
+&lt;p&gt;Rest assured that I am &lt;em&gt;not&lt;/em&gt; going to show any trpophobia-triggering images in this blog post.&lt;/p&gt;
+
+&lt;h3 id=&quot;what-does-trypophobia-blocker-do&quot;&gt;What does Trypophobia Blocker do?&lt;/h3&gt;
+
+&lt;p&gt;Trypophobia Blocker contains a convolutional neural network that can classify
+whether an image is trypophobia-triggering or not. This neural network is run
+against all images displayed on a page and blurs out any images that are
+trypophobia triggering. No data is sent to me as all computation occurs locally.&lt;/p&gt;
+
+&lt;p&gt;Users have the option to provide feedback for the network — you can unblur and
+image if you think it is a regular image, or you can blur out the image manually
+if it is triggering trypophobia. The image URL is sent to a server to improve
+the dataset and the model further. Users’ IPs or browsing history is not
+recorded.&lt;/p&gt;
+
+&lt;p&gt;The network is validated against a hold-out test set and has a precision of
+97.12% and a recall of 85.63%. More on this test set in the next section.&lt;/p&gt;
+
+&lt;h3 id=&quot;why-this-project&quot;&gt;Why this Project?&lt;/h3&gt;
+
+&lt;p&gt;This idea comes from my girlfriend who suffers from a pretty severe case of
+trypophobia. When she browse Instagram or Facebook, she always find unexpected
+images on triggering her trypophobia. I thought this is a perfect use case how
+deep learning can be used to improve someone’s quality of life.&lt;/p&gt;
+
+&lt;h3 id=&quot;show-me-the-dataset&quot;&gt;Show Me the Dataset&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/trypophobia-blocker/k8s-cron-job.png&quot; alt=&quot;&quot; /&gt;
+&lt;em&gt;Cron jobs are scheduled on a kubernetes cluster to download the latest images
+from various subreddits.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Perhaps surprising to the general public about AI, the most important component
+of this project is actually the dataset, especially for a well-established
+problem like this — image classification. A good amount of effort is spent on
+scraping the Internet for trypophobia-triggering images.&lt;/p&gt;
+
+&lt;p&gt;The base of this dataset comes from &lt;a href=&quot;https://www.kaggle.com/cytadela8/trypophobia&quot;&gt;Artur Puzio’s dataset on
+Kaggle&lt;/a&gt; This contains 6k
+trypophobia-triggering images by scraping Google Image and the r/trypophobia
+subreddit, and 10.5k normal images.&lt;/p&gt;
+
+&lt;p&gt;I further expanded this dataset by scraping
+&lt;a href=&quot;https://old.reddit.com/r/trypophobia/&quot;&gt;r/trypophobia&lt;/a&gt; subreddit every 6 hours
+and gather normal images by scraping images from 15 other subreddits (e.g.
+&lt;a href=&quot;https://old.reddit.com/r/pics&quot;&gt;r/pics&lt;/a&gt;,
+&lt;a href=&quot;https://old.reddit.com/r/OldSchoolCool/&quot;&gt;r/OldSchoolCool&lt;/a&gt;,
+&lt;a href=&quot;https://old.reddit.com/r/memes&quot;&gt;r/memes&lt;/a&gt;,
+&lt;a href=&quot;https://old.reddit.com/r/aww/&quot;&gt;r/aww&lt;/a&gt;, etc.)&lt;/p&gt;
+
+&lt;p&gt;One challenge of gathering this dataset is that the &lt;a href=&quot;https://old.reddit.com/dev/api/&quot;&gt;Reddit
+API&lt;/a&gt; does not return all posts, but only the
+top or most recent 1000 posts. So to capture all images submitted to the
+&lt;a href=&quot;https://old.reddit.com/r/trypophobia/&quot;&gt;r/trypophobia&lt;/a&gt; subreddit, the crawler is
+schdeuled to run every 6 hours.&lt;/p&gt;
+
+&lt;p&gt;To better measure real-world performance, special care is taken to curate the
+test dataset. Below shows the construction of the test set.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;“Normal”
+    &lt;ul&gt;
+      &lt;li&gt;Top-100 most upvoted images all-time&lt;/li&gt;
+      &lt;li&gt;Top-50 most upvoted images today&lt;/li&gt;
+      &lt;li&gt;Top-50 most upvoted image this week&lt;/li&gt;
+      &lt;li&gt;Top-50 most upvoted images this month&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;“Trypophobia-triggering”
+    &lt;ul&gt;
+      &lt;li&gt;Top-25 most upvoted images in r/trypophobia all-time&lt;/li&gt;
+      &lt;li&gt;Top-25 most upvoted images in r/trypophobia this week&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The test set is constructed in the way that it emphasizes popular images because
+they are the images that the user might stumble into after all.&lt;/p&gt;
+
+&lt;p&gt;As of February 2021, this dataset now has almost 300k images with 14k being
+trypophobia-triggering.&lt;/p&gt;
+
+&lt;h3 id=&quot;model-training&quot;&gt;Model Training&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/trypophobia-blocker/model-wandb.png&quot; alt=&quot;&quot; /&gt;
+&lt;em&gt;Model training metrics on &lt;a href=&quot;https://wandb.ai/home&quot;&gt;Weights and Biases&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;The underlying model is a fine-tuned &lt;a href=&quot;https://keras.io/api/applications/mobilenet/&quot;&gt;MobileNet
+v1&lt;/a&gt; with 2.23M parameters. I tried
+to use a more modern network like
+&lt;a href=&quot;https://keras.io/api/applications/efficientnet/&quot;&gt;EfficientNet-b0&lt;/a&gt; but
+&lt;a href=&quot;https://github.com/tensorflow/tfjs&quot;&gt;Tensorflow.js&lt;/a&gt; does not seem to be able to
+convert the weights and the graph correctly.&lt;/p&gt;
+
+&lt;p&gt;Another unexplored alternative is to use a shallower network. A shallower
+network (fewer layers and FLOPs) makes sense in this use-case because the
+trypophobia-triggering pattern is local and context is usually not necessary to
+classify whether the image is trypophobia-triggering.&lt;/p&gt;
+
+&lt;h3 id=&quot;fixing-the-labels&quot;&gt;Fixing the Labels&lt;/h3&gt;
+
+&lt;p&gt;A sharp reader must have noticed that we are treating images outside the
+r/trypophobia as normal. But this is untrue — a top-voted image can be
+trypophobia-triggering.&lt;/p&gt;
+
+&lt;p&gt;So every time a model is trained, labeling jobs are created to correct the image
+with suspicious labels. Specifically, we select &lt;strong&gt;ambiguous&lt;/strong&gt; images (with
+predicted probability close to 0.5), &lt;strong&gt;strong false positive&lt;/strong&gt; (i.e. images with
+the normal label but predicted to be trypophobia-triggering with high
+confidence) and &lt;strong&gt;strong false negative&lt;/strong&gt; (i.e. images labeled as
+trypophobia-triggering but predicted to be normal with high confidence.)&lt;/p&gt;
+
+&lt;p&gt;Roughly 500 images will be relabeled each round and about 40% of the labels will
+be corrected by human moderators.&lt;/p&gt;
+
+&lt;h3 id=&quot;deploying-as-chrome-extension&quot;&gt;Deploying as Chrome Extension&lt;/h3&gt;
+
+&lt;p&gt;Now that we have a trained model, we would like to run our trained model on
+every image that the browser is showing the user. However, this is easier than
+done.&lt;/p&gt;
+
+&lt;p&gt;The Chrome extension has two components: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;content.js&lt;/code&gt; that get injected into the
+webpage and a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;background.js&lt;/code&gt; that runs in the background.&lt;/p&gt;
+
+&lt;p&gt;I set up 2 types of event listeners on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;content.js&lt;/code&gt; — &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DOMContentLoaded&lt;/code&gt; and
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MutationObserver&lt;/code&gt;. When an image gets added to the DOM, it will be blurred out
+since we don’t know whether it’s trypophobia triggering or not. Then a “message”
+containing the image URL will be sent to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;background.js&lt;/code&gt;. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;background.js&lt;/code&gt;
+contains the network and listen to all the messages from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;content.js&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Once &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;content.js&lt;/code&gt; hears back from model inference results from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;background.js&lt;/code&gt;,
+it will either apply a stronger blur if the image is trypophobia triggering or
+remove the blur entirely for normal images.&lt;/p&gt;
+
+&lt;h3 id=&quot;user-feedback&quot;&gt;User Feedback&lt;/h3&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/trypophobia-blocker/right-click-menu.png&quot; alt=&quot;Right click menu&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If the model makes a mistake in the wild, there is a mechanism to allow the user
+to provide feedback to the model. The user can either report an image as
+trypophobia-triggering and blurs out the image, or reveal a blurred image and
+report the image as normal. This feedback is logged in a simple flask app hosted
+on Heroku.&lt;/p&gt;
+
+&lt;p&gt;This Heroku app uses a Postgres database to store the user feedback. Only the
+image URL and time of submission are collected and browsing history is not
+recorded in any way.&lt;/p&gt;
+
+&lt;h3 id=&quot;closing-thoughts&quot;&gt;Closing Thoughts&lt;/h3&gt;
+
+&lt;p&gt;Shipping a production machine learning model end-to-end is rarely talked about.
+Most focus on the glory parts of machine learning, such as new fancy
+architecture, an outrageous amount of parameters, or the global-warming-inducing
+amount of GPUs required to train the model.&lt;/p&gt;
+
+&lt;p&gt;This project shows you that data collection, user-feedback for continuous
+improvement are just as important as the model itself. We are in an era where
+every software engineer can easily develop a machine learning model. Machine
+learning practitioners should put more focus on what happens before model
+training and after model training.&lt;/p&gt;
+</description>
+        <pubDate>Wed, 10 Feb 2021 00:00:00 -0800</pubDate>
+        <link>http://felixlaumon.github.io/2021/02/10/trypophobia-blocker.html</link>
+        <guid isPermaLink="true">http://felixlaumon.github.io/2021/02/10/trypophobia-blocker.html</guid>
+        
+        
+      </item>
     
       <item>
         <title>Recognizing and Localizing Endangered Right Whales with Extremely Deep Neural Networks</title>
         <description>&lt;p&gt;In this post I’ll share my experience and explain my approach for the &lt;a href=&quot;https://www.kaggle.com/c/noaa-right-whale-recognition&quot;&gt;Kaggle Right Whale&lt;/a&gt; challenge. I managed to finish in 2nd place.&lt;/p&gt;
 
-&lt;h2 id=&quot;background&quot;&gt;1. Background&lt;/h2&gt;
+&lt;h2 id=&quot;1-background&quot;&gt;1. Background&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Right_whale&quot;&gt;Right whale&lt;/a&gt; is an endangered species with fewer than 500 left in the Atlantic Ocean. As part of an ongoing preservation effort, experienced marine scientists track them across the ocean to understand their behaviors, and monitor their health condition. The current process is quite time-consuming and laborious. It starts with photographing these whales during aerial surveys, selecting and importing the photos into a catalog, and finally the photos are compared against the known whales inside the catalog by trained researchers. Each right whale has unique callosity pattern on the whale head (see digram below). You can find more details at &lt;a href=&quot;https://www.kaggle.com/c/noaa-right-whale-recognition&quot;&gt;the competition page&lt;/a&gt;. The goal of the competition was to develop an automated process to identify the whales from aerial photos.&lt;/p&gt;
 
@@ -37,11 +229,11 @@ Human&quot; /&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;h2 id=&quot;dataset&quot;&gt;2. Dataset&lt;/h2&gt;
+&lt;h2 id=&quot;2-dataset&quot;&gt;2. Dataset&lt;/h2&gt;
 
 &lt;p&gt;This dataset was special in 2 main ways from the perspective of machine learning.&lt;/p&gt;
 
-&lt;h3 id=&quot;dataset-distribution&quot;&gt;2.1 Dataset distribution&lt;/h3&gt;
+&lt;h3 id=&quot;21-dataset-distribution&quot;&gt;2.1 Dataset distribution&lt;/h3&gt;
 
 &lt;p&gt;It was &lt;strong&gt;non-straightforward to split the dataset into training and validation set&lt;/strong&gt;. There were only 4237 images for 427 right whales. Most importantly the number of images per whales varies hugely, as can be seen from the below histogram. &lt;strong&gt;There were 24 whales that came with only 1 image in the dataset!&lt;/strong&gt;&lt;/p&gt;
 
@@ -55,7 +247,7 @@ Human&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Ironically none of model trained before that point ended up in the final submission. Lesson learned: it is never too late to makes thing right, just like in life.&lt;/p&gt;
 
-&lt;h3 id=&quot;extremely-fine-grained-classification&quot;&gt;2.2 Extremely fine-grained classification&lt;/h3&gt;
+&lt;h3 id=&quot;22-extremely-fine-grained-classification&quot;&gt;2.2 Extremely fine-grained classification&lt;/h3&gt;
 
 &lt;p&gt;Unlike many commonly cited classification tasks which is to &lt;strong&gt;classify images into different species&lt;/strong&gt; (&lt;a href=&quot;http://www.vision.caltech.edu/visipedia/CUB-200.html&quot;&gt;bird&lt;/a&gt;, &lt;a href=&quot;http://leafsnap.com/dataset/&quot;&gt;tree leaves&lt;/a&gt;, dogs in ImageNet), this task is to &lt;strong&gt;classify images of the same species into different individuals&lt;/strong&gt;. So the classifier must pick up the fine details of the callosity patterns regardless of image perspective and exposure etc.&lt;/p&gt;
 
@@ -63,7 +255,7 @@ Human&quot; /&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;h2 id=&quot;software-and-hardware&quot;&gt;3. Software and Hardware&lt;/h2&gt;
+&lt;h2 id=&quot;3-software-and-hardware&quot;&gt;3. Software and Hardware&lt;/h2&gt;
 
 &lt;h4 id=&quot;software&quot;&gt;Software&lt;/h4&gt;
 
@@ -79,7 +271,7 @@ Human&quot; /&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;h2 id=&quot;approaches&quot;&gt;4. Approaches&lt;/h2&gt;
+&lt;h2 id=&quot;4-approaches&quot;&gt;4. Approaches&lt;/h2&gt;
 
 &lt;p&gt;All my approaches were based on &lt;strong&gt;deep convolutional neural network (CNN)&lt;/strong&gt;, as I initially believed that human is no match to machine in extracting image feature. However it turned out that machines are not quite there yet. &lt;strong&gt;Understanding neural network performance bottleneck proved to be very important.&lt;/strong&gt;&lt;/p&gt;
 
@@ -87,7 +279,7 @@ Human&quot; /&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;h3 id=&quot;baseline-naive-approach&quot;&gt;4.1 Baseline Naive Approach&lt;/h3&gt;
+&lt;h3 id=&quot;41-baseline-naive-approach&quot;&gt;4.1 Baseline Naive Approach&lt;/h3&gt;
 
 &lt;p&gt;After deciding to participate in this competition, the first thing I did was to establish a baseline classifier with CNN.&lt;/p&gt;
 
@@ -113,7 +305,7 @@ Human&quot; /&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;h3 id=&quot;bounding-box-localization&quot;&gt;4.2 Bounding Box Localization&lt;/h3&gt;
+&lt;h3 id=&quot;42-bounding-box-localization&quot;&gt;4.2 Bounding Box Localization&lt;/h3&gt;
 
 &lt;p&gt;To help the classifier &lt;strong&gt;locating the whale head&lt;/strong&gt; and hence improve the score, I added a &lt;strong&gt;localizer&lt;/strong&gt; before the classifier.&lt;/p&gt;
 
@@ -123,7 +315,7 @@ Human&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;This is made possible thanks to the &lt;a href=&quot;https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17421/complete-train-set-head-annotations&quot;&gt;annotations by Vinh Nguyen&lt;/a&gt; posted to the competition forum.&lt;/p&gt;
 
-&lt;h4 id=&quot;localizer&quot;&gt;4.2.1 Localizer&lt;/h4&gt;
+&lt;h4 id=&quot;421-localizer&quot;&gt;4.2.1 Localizer&lt;/h4&gt;
 
 &lt;p&gt;I treated the localization problem as a &lt;strong&gt;regression&lt;/strong&gt; problem, so that the objective of the localizer CNN is to &lt;strong&gt;minimize the mean squared error (MSE) between the predicted and actual bounding box&lt;/strong&gt;. The bounding boxes were represented by x, y, width and height and were normalized into (0, 1) by dividing with the image size.&lt;/p&gt;
 
@@ -146,7 +338,7 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 &lt;p&gt;&lt;img src=&quot;/assets/kaggle-right-whale/bounding_box_test_sample.png&quot; alt=&quot;Sample of cropped image from the test set&quot; /&gt;&lt;/p&gt;
 
-&lt;h4 id=&quot;classifier&quot;&gt;4.2.2 Classifier&lt;/h4&gt;
+&lt;h4 id=&quot;422-classifier&quot;&gt;4.2.2 Classifier&lt;/h4&gt;
 
 &lt;p&gt;The classifier for this approach was again a OxfordNet trained on cropped 256x256 images.&lt;/p&gt;
 
@@ -156,7 +348,7 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 &lt;hr /&gt;
 
-&lt;h3 id=&quot;whale-head-aligner&quot;&gt;4.3 Whale Head Aligner&lt;/h3&gt;
+&lt;h3 id=&quot;43-whale-head-aligner&quot;&gt;4.3 Whale Head Aligner&lt;/h3&gt;
 
 &lt;p&gt;At this point, it was clear that the &lt;strong&gt;main performance bottleneck is that the classifier was not able to focus on the actual discriminating part of the whales (i.e. the callosity pattern)&lt;/strong&gt;. So in this approach, a new &lt;strong&gt;aligner replaced the localizer&lt;/strong&gt;. Particularly, the aligner rotated the images so the whale’s &lt;strong&gt;bonnet would be always to the right the blowhead&lt;/strong&gt; in the cropped image.&lt;/p&gt;
 
@@ -170,9 +362,9 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 &lt;p&gt;They also employed locally-connected convolutional layers, which different filters were learned at different pixel locations. However I did not ended up using the locally-connected convolutional layers in my models because simply the implementation in &lt;a href=&quot;https://github.com/jaberg/TheanoLinear&quot;&gt;TheanoLinear&lt;/a&gt; doesn’t seem to be compatible the Theano version I am using.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/kaggle-right-whale/deepface_3d_frontalization.png&quot; alt=&quot;DeepFace&#39;s 3D frontalization&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/assets/kaggle-right-whale/deepface_3d_frontalization.png&quot; alt=&quot;DeepFace's 3D frontalization&quot; /&gt;&lt;/p&gt;
 
-&lt;h4 id=&quot;aligner&quot;&gt;4.3.1 Aligner&lt;/h4&gt;
+&lt;h4 id=&quot;431-aligner&quot;&gt;4.3.1 Aligner&lt;/h4&gt;
 
 &lt;p&gt;The aligner was again a OxfordNet-style network and its target was normalized x, y-coordinates of the bonnet and blowhead. Inspired by the recent papers related to face image recognition, I replaced the 2 stacks of fully connected layers with a global averaging layer, and used stride=2 convolution instead of max-pooling when reducing feature maps size. I also started to apply &lt;strong&gt;batch-normalization&lt;/strong&gt; everywhere.&lt;/p&gt;
 
@@ -182,7 +374,7 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 &lt;p&gt;I applied &lt;strong&gt;test-time augmentation&lt;/strong&gt; and found that it helped the improving accuracy significantly. So, for each test image, I applied multiply affine transformations and then fed them into the aligner. I inverse applied the affine transformation to the predicted bonnet and blowhead coordinates and simply took the average of those coordinates.&lt;/p&gt;
 
-&lt;h4 id=&quot;classifier-1&quot;&gt;4.3.2 Classifier&lt;/h4&gt;
+&lt;h4 id=&quot;432-classifier&quot;&gt;4.3.2 Classifier&lt;/h4&gt;
 
 &lt;p&gt;The main classifier I used in this approach was a similar 19-layers OxfordNet. I carried over the global averaging layer and stride=2 as max-pooling. The difference was that &lt;strong&gt;minimal augmentation&lt;/strong&gt; was applied because both the &lt;strong&gt;training and testing images would be aligned&lt;/strong&gt;. I empirically found that heavy augmentation prevented the network to converge, and lighter augmentation did not lead to overfitting. For similar reason, I did not apply test-time augmentation to the classifier.&lt;/p&gt;
 
@@ -190,11 +382,11 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 &lt;hr /&gt;
 
-&lt;h2 id=&quot;more-experimentations&quot;&gt;5. More Experimentations&lt;/h2&gt;
+&lt;h2 id=&quot;5-more-experimentations&quot;&gt;5. More Experimentations&lt;/h2&gt;
 
 &lt;p&gt;2 weeks before the deadline, I started to experiment with the state-of-the-art CNN structures. Some of them ended up being used in the final submission.&lt;/p&gt;
 
-&lt;h3 id=&quot;deep-residual-network-resnet&quot;&gt;5.1 Deep Residual Network (ResNet)&lt;/h3&gt;
+&lt;h3 id=&quot;51-deep-residual-network-resnet&quot;&gt;5.1 Deep Residual Network (ResNet)&lt;/h3&gt;
 
 &lt;p&gt;The success of deep learning is usually attributed to the highly non-linear nature of neural network with stacks of layers. However the &lt;a href=&quot;http://arxiv.org/pdf/1512.03385v1.pdf&quot;&gt;ResNet&lt;/a&gt; authors observed an counter-intuitive phenomenon – simply adding more layers to a neural network will increase training error. They hypothesized that it would be effective to encourage the network to learn the “residual error” instead of the original mapping.&lt;/p&gt;
 
@@ -212,65 +404,65 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 &lt;p&gt;Near the end of the competition, I also successfully trained a &lt;strong&gt;very deep and very thin ResNet with 67 layers&lt;/strong&gt;. Below is its model definition:&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-py&quot; data-lang=&quot;py&quot;&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InputLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;in&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;image_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;image_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-py&quot; data-lang=&quot;py&quot;&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;InputLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'in'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;image_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;image_size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# 256x256&lt;/span&gt;
-
+&lt;span class=&quot;c1&quot;&gt;# 256x256
+&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;conv2dbn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;l1c1&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num_filters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filter_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stride&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'l1c1'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num_filters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filter_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stride&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
     &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conv_kwargs&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# 128x128&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dnn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MaxPool2DDNNLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;l1p&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stride&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# 64x64&lt;/span&gt;
-
+&lt;span class=&quot;c1&quot;&gt;# 128x128
+&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dnn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MaxPool2DDNNLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'l1p'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stride&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# 64x64
+&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;residual_block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;2c&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'2c%s'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;num_filters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;48&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filter_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;num_layers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conv_kwargs&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# 64x64&lt;/span&gt;
-
+&lt;span class=&quot;c1&quot;&gt;# 64x64
+&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;actual_stride&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;residual_block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;3c&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'3c%s'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;num_filters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filter_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stride&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;actual_stride&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;num_layers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conv_kwargs&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# 32x32&lt;/span&gt;
-
+&lt;span class=&quot;c1&quot;&gt;# 32x32
+&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;23&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;actual_stride&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;residual_block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;4c&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'4c%s'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;num_filters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;80&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filter_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stride&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;actual_stride&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;num_layers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conv_kwargs&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# 16x16&lt;/span&gt;
-
+&lt;span class=&quot;c1&quot;&gt;# 16x16
+&lt;/span&gt;
 &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;actual_stride&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;residual_block&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;5c&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s&#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'5c%s'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;num_filters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;128&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filter_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;stride&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;actual_stride&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
         &lt;span class=&quot;n&quot;&gt;num_layers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;**&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;conv_kwargs&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# 8x8&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# 8x8
+&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dnn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pool2DDNNLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'gp'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'average_inc_pad'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DropoutLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'gpdrop'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dnn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Pool2DDNNLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;gp&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pool_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;average_inc_pad&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DropoutLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;gpdrop&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DenseLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;out&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num_units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n_classes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nonlinearity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nonlinearities&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;softmax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;layers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DenseLayer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'out'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num_units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n_classes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nonlinearity&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nonlinearities&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;softmax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Interestingly, comparing with SGD, the ADAM optimizer led to more stable validation loss. Also, comparing with the 19-layer OxfordNet, the 67-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rates.&lt;/p&gt;
 
 &lt;p&gt;At the end, I still had a lot of questions about how to best apply residual training to neural network. For example, if residual learning is so effective, would learning the residual of the residual error be even more effective (shortcut of shortcut layer)? Why does the optimizer has difficulty learning the original mapping in the first place? Can we combine ResNet with Highway Network? If the degradation problem is largely overcome, are the existing regularization techniques (maxout, dropout, l2 etc.) still applicable?&lt;/p&gt;
 
-&lt;h3 id=&quot;inception-v3&quot;&gt;5.2 Inception v3&lt;/h3&gt;
+&lt;h3 id=&quot;52-inception-v3&quot;&gt;5.2 Inception v3&lt;/h3&gt;
 
 &lt;p&gt;Following the success I had with ResNet, I decided to also replicate the other top performer of the ILSVRC challenge – &lt;a href=&quot;http://arxiv.org/pdf/1512.00567v3.pdf&quot;&gt;Inception v3&lt;/a&gt;.&lt;/p&gt;
 
@@ -278,13 +470,13 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 &lt;p&gt;I did not ended up using the Inception network in the final ensemble.&lt;/p&gt;
 
-&lt;h3 id=&quot;scaling-training-horizontally-and-idea-validation&quot;&gt;5.3 Scaling training horizontally and Idea Validation&lt;/h3&gt;
+&lt;h3 id=&quot;53-scaling-training-horizontally-and-idea-validation&quot;&gt;5.3 Scaling training horizontally and Idea Validation&lt;/h3&gt;
 
 &lt;p&gt;Because of my late start, the lengthy neural network training process became a huge problem. Most models used for submission &lt;strong&gt;took at least 36 hours to fully converge&lt;/strong&gt;. So I bought an old GTX670 to optimize the hyperparameter for the aligner, while I used my main GTX980Ti for the classifier.&lt;/p&gt;
 
 &lt;p&gt;I found that having &lt;strong&gt;additional graphics card was much more helpful than having a faster graphics card&lt;/strong&gt;. So one week before the deadline, I hacked together a system that allowed me to easily &lt;strong&gt;train a model on AWS EC2 GPU instances (g2.xlarge) as if I was training it locally&lt;/strong&gt;, by running this command.&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;eval “$(docker-machine env aws0x)”
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;eval “$(docker-machine env aws0x)”
 docker run -ti \
     -d \
     --device /dev/nvidia0:/dev/nvidia0 \
@@ -294,8 +486,7 @@ docker run -ti \
     -v /mnt/kaggle-right-whale/models:/kaggle-right-whale/models \
     felixlaumon/kaggle-right-whale \
     ./scripts/train_model.py --model … --data --use_cropped --continue_training
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;p&gt;The model definitions were built as part of the container image. The whale images were uploaded to S3 from my local machine when necessary and were mounted inside the container. The trained models were then synced back to the S3 every minute and then to my local machine.&lt;/p&gt;
 
@@ -305,7 +496,7 @@ docker run -ti \
 
 &lt;hr /&gt;
 
-&lt;h2 id=&quot;final-submission&quot;&gt;6. Final Submission&lt;/h2&gt;
+&lt;h2 id=&quot;6-final-submission&quot;&gt;6. Final Submission&lt;/h2&gt;
 
 &lt;p&gt;The final submission was an ensemble of 6 models:&lt;/p&gt;
 
@@ -324,13 +515,13 @@ docker run -ti \
 
 &lt;hr /&gt;
 
-&lt;h2 id=&quot;unimplemented-approaches&quot;&gt;7. Unimplemented Approaches&lt;/h2&gt;
+&lt;h2 id=&quot;7-unimplemented-approaches&quot;&gt;7. Unimplemented Approaches&lt;/h2&gt;
 
 &lt;p&gt;Here are some more ideas that should yield significant score improvement. But I was not able to finish implementing them fully before the deadline.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;If you attempted any of these approaches or have any suggestion, please leave a comment below as I am very interested in how these ideas could have been panned out.&lt;/strong&gt;&lt;/p&gt;
 
-&lt;h3 id=&quot;reposing-the-problem-to-generate-more-training-data&quot;&gt;7.1. Reposing the Problem to Generate More Training Data&lt;/h3&gt;
+&lt;h3 id=&quot;71-reposing-the-problem-to-generate-more-training-data&quot;&gt;7.1. Reposing the Problem to Generate More Training Data&lt;/h3&gt;
 
 &lt;p&gt;As mentioned before, one of the main challenges was the uneven distribution of number of images per whale, and the limited number of images in general. To avoid this problem, we can first &lt;strong&gt;repose the task as to identify if a pair of images belong to the same whale or not&lt;/strong&gt;. Then we can train a classifier to learn an &lt;strong&gt;embedding&lt;/strong&gt; which maps the whale images into compact feature vectors. The objective of the classifier was to maximize the euclidean distance of the feature vectors that contains the different whales, and minimize the distance with same whales. This idea was largely based on &lt;strong&gt;&lt;a href=&quot;http://arxiv.org/pdf/1503.03832v3.pdf&quot;&gt;FaceNet&lt;/a&gt;&lt;/strong&gt;.&lt;/p&gt;
 
@@ -338,7 +529,7 @@ docker run -ti \
 
 &lt;p&gt;&lt;img src=&quot;/assets/kaggle-right-whale/facenet.png&quot; alt=&quot;Diagrams from FaceNet&quot; /&gt;&lt;/p&gt;
 
-&lt;h3 id=&quot;joint-training-of-whale-aligner-and-classifier&quot;&gt;7.2. Joint Training of Whale Aligner and Classifier&lt;/h3&gt;
+&lt;h3 id=&quot;72-joint-training-of-whale-aligner-and-classifier&quot;&gt;7.2. Joint Training of Whale Aligner and Classifier&lt;/h3&gt;
 
 &lt;p&gt;I briefly tried to apply &lt;strong&gt;&lt;a href=&quot;http://arxiv.org/pdf/1506.02025v2.pdf&quot;&gt;Spatial Transformer Network&lt;/a&gt; (ST-CNN)&lt;/strong&gt; to merge the aligner and the classifier. I expected good result because the localization and classification would be trained end-to-end.&lt;/p&gt;
 
@@ -358,7 +549,7 @@ docker run -ti \
 
 &lt;p&gt;&lt;em&gt;I am particularly interested in understanding how ST-CNN should be applied to this dataset. Please contact me if you have any suggestions.&lt;/em&gt;&lt;/p&gt;
 
-&lt;h3 id=&quot;transfer-learning&quot;&gt;7.3. Transfer Learning&lt;/h3&gt;
+&lt;h3 id=&quot;73-transfer-learning&quot;&gt;7.3. Transfer Learning&lt;/h3&gt;
 
 &lt;p&gt;Transfer learning offers an alternative way to &lt;strong&gt;reduce training time&lt;/strong&gt;, other than to simply spawning more GPU instances.&lt;/p&gt;
 
@@ -366,13 +557,13 @@ docker run -ti \
 
 &lt;p&gt;I investigated briefly with &lt;strong&gt;&lt;a href=&quot;http://arxiv.org/pdf/1511.05641v2.pdf&quot;&gt;Net2Net&lt;/a&gt;&lt;/strong&gt; but wasn’t able to implement its algorithm.&lt;/p&gt;
 
-&lt;h3 id=&quot;pre-training&quot;&gt;7.4 Pre-training&lt;/h3&gt;
+&lt;h3 id=&quot;74-pre-training&quot;&gt;7.4 Pre-training&lt;/h3&gt;
 
 &lt;p&gt;Pre-training the classifier with test images might have helped because the &lt;strong&gt;testing set had more images than the training set&lt;/strong&gt;. Combining with section 7.1, we could even &lt;strong&gt;apply the learned embedding to the test set to generate labels&lt;/strong&gt;. I expected this might lead to better result than &lt;strong&gt;pseudo-labelling.&lt;/strong&gt;&lt;/p&gt;
 
 &lt;hr /&gt;
 
-&lt;h2 id=&quot;conclusion&quot;&gt;8. Conclusion&lt;/h2&gt;
+&lt;h2 id=&quot;8-conclusion&quot;&gt;8. Conclusion&lt;/h2&gt;
 
 &lt;p&gt;I had a lot of fun working on this challenge, and I learned a lot when trying to find new and interesting ideas from academic research. The last 3 weeks were very exhausting for me, because there were so much to do and I was working alone! Next time I would definitely team up.&lt;/p&gt;
 
@@ -389,12 +580,8 @@ docker run -ti \
 &lt;p&gt;&lt;strong&gt;Update 1&lt;/strong&gt;: See further discussions about this blog post at &lt;a href=&quot;https://www.reddit.com/r/MachineLearning/comments/40hluu/recognizing_and_localizing_endagered_right_whale/&quot;&gt;r/machinelearning&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Update 2&lt;/strong&gt;: The source code is now available at &lt;a href=&quot;https://github.com/felixlaumon/kaggle-right-whale&quot;&gt;https://github.com/felixlaumon/kaggle-right-whale&lt;/a&gt;&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;If you are interested in solving challenging problems like this one, my employer &lt;a href=&quot;http://alvanon.com&quot;&gt;Alvanon&lt;/a&gt; is hiring Data Scientist and Software Developer at the Hong Kong office. You should check out the details at &lt;a href=&quot;http://alvanon.com/careers/&quot;&gt;http://alvanon.com/careers/&lt;/a&gt; and contact &lt;a href=&quot;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#116;&amp;#111;:&amp;#107;&amp;#101;&amp;#118;&amp;#105;&amp;#110;&amp;#046;&amp;#099;&amp;#097;&amp;#109;&amp;#112;&amp;#098;&amp;#101;&amp;#108;&amp;#108;&amp;#064;&amp;#097;&amp;#108;&amp;#118;&amp;#097;&amp;#110;&amp;#111;&amp;#110;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&quot;&gt;&amp;#107;&amp;#101;&amp;#118;&amp;#105;&amp;#110;&amp;#046;&amp;#099;&amp;#097;&amp;#109;&amp;#112;&amp;#098;&amp;#101;&amp;#108;&amp;#108;&amp;#064;&amp;#097;&amp;#108;&amp;#118;&amp;#097;&amp;#110;&amp;#111;&amp;#110;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&lt;/a&gt; and &lt;a href=&quot;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#116;&amp;#111;:&amp;#102;&amp;#101;&amp;#108;&amp;#105;&amp;#120;&amp;#046;&amp;#108;&amp;#097;&amp;#117;&amp;#064;&amp;#097;&amp;#108;&amp;#118;&amp;#097;&amp;#110;&amp;#111;&amp;#110;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&quot;&gt;&amp;#102;&amp;#101;&amp;#108;&amp;#105;&amp;#120;&amp;#046;&amp;#108;&amp;#097;&amp;#117;&amp;#064;&amp;#097;&amp;#108;&amp;#118;&amp;#097;&amp;#110;&amp;#111;&amp;#110;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&lt;/a&gt;.&lt;/p&gt;
 </description>
-        <pubDate>Thu, 08 Jan 2015 00:00:00 +0800</pubDate>
+        <pubDate>Thu, 08 Jan 2015 00:00:00 -0800</pubDate>
         <link>http://felixlaumon.github.io/2015/01/08/kaggle-right-whale.html</link>
         <guid isPermaLink="true">http://felixlaumon.github.io/2015/01/08/kaggle-right-whale.html</guid>
         
