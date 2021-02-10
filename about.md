@@ -20,9 +20,9 @@ MRI scans for data augmentation.
 Prior to that, I worked at [Alvanon](http://alvanon.com/) and built computer
 vision and analytics system for the fashion and retailing industry.
 
-My first job is a software engineer at [Onswipe](https://angel.co/onswipe) where
-I developed its core publishing platform and [touch-optimized user interface
-engine](https://vimeo.com/44825526). I also optimized its [advertising
+My first job was at [Onswipe](https://angel.co/onswipe) as a software engineer
+where I developed its core publishing platform and [touch-optimized user
+interface engine](https://vimeo.com/44825526). I also optimized its [advertising
 platform](https://vimeo.com/41152592) which has served over 120 million unique
 users and was used by top-tier online publications.
 
