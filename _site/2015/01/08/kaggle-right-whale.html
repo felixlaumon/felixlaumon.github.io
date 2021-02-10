@@ -51,7 +51,7 @@
       <div class="trigger">
         
           
-          <a class="page-link" href="/about/">About</a>
+          <a class="page-link" href="/about/">About Felix</a>
           
         
           
@@ -74,13 +74,13 @@
 
   <header class="post-header">
     <h1 class="post-title" itemprop="name headline">Recognizing and Localizing Endangered Right Whales with Extremely Deep Neural Networks</h1>
-    <p class="post-meta"><time datetime="2015-01-08T00:00:00+08:00" itemprop="datePublished">Jan 8, 2015</time></p>
+    <p class="post-meta"><time datetime="2015-01-08T00:00:00-08:00" itemprop="datePublished">Jan 8, 2015</time></p>
   </header>
 
   <div class="post-content" itemprop="articleBody">
     <p>In this post I’ll share my experience and explain my approach for the <a href="https://www.kaggle.com/c/noaa-right-whale-recognition">Kaggle Right Whale</a> challenge. I managed to finish in 2nd place.</p>
 
-<h2 id="background">1. Background</h2>
+<h2 id="1-background">1. Background</h2>
 
 <p><a href="https://en.wikipedia.org/wiki/Right_whale">Right whale</a> is an endangered species with fewer than 500 left in the Atlantic Ocean. As part of an ongoing preservation effort, experienced marine scientists track them across the ocean to understand their behaviors, and monitor their health condition. The current process is quite time-consuming and laborious. It starts with photographing these whales during aerial surveys, selecting and importing the photos into a catalog, and finally the photos are compared against the known whales inside the catalog by trained researchers. Each right whale has unique callosity pattern on the whale head (see digram below). You can find more details at <a href="https://www.kaggle.com/c/noaa-right-whale-recognition">the competition page</a>. The goal of the competition was to develop an automated process to identify the whales from aerial photos.</p>
 
@@ -104,11 +104,11 @@ Human" /></p>
 
 <hr />
 
-<h2 id="dataset">2. Dataset</h2>
+<h2 id="2-dataset">2. Dataset</h2>
 
 <p>This dataset was special in 2 main ways from the perspective of machine learning.</p>
 
-<h3 id="dataset-distribution">2.1 Dataset distribution</h3>
+<h3 id="21-dataset-distribution">2.1 Dataset distribution</h3>
 
 <p>It was <strong>non-straightforward to split the dataset into training and validation set</strong>. There were only 4237 images for 427 right whales. Most importantly the number of images per whales varies hugely, as can be seen from the below histogram. <strong>There were 24 whales that came with only 1 image in the dataset!</strong></p>
 
@@ -122,7 +122,7 @@ Human" /></p>
 
 <p>Ironically none of model trained before that point ended up in the final submission. Lesson learned: it is never too late to makes thing right, just like in life.</p>
 
-<h3 id="extremely-fine-grained-classification">2.2 Extremely fine-grained classification</h3>
+<h3 id="22-extremely-fine-grained-classification">2.2 Extremely fine-grained classification</h3>
 
 <p>Unlike many commonly cited classification tasks which is to <strong>classify images into different species</strong> (<a href="http://www.vision.caltech.edu/visipedia/CUB-200.html">bird</a>, <a href="http://leafsnap.com/dataset/">tree leaves</a>, dogs in ImageNet), this task is to <strong>classify images of the same species into different individuals</strong>. So the classifier must pick up the fine details of the callosity patterns regardless of image perspective and exposure etc.</p>
 
@@ -130,7 +130,7 @@ Human" /></p>
 
 <hr />
 
-<h2 id="software-and-hardware">3. Software and Hardware</h2>
+<h2 id="3-software-and-hardware">3. Software and Hardware</h2>
 
 <h4 id="software">Software</h4>
 
@@ -146,7 +146,7 @@ Human" /></p>
 
 <hr />
 
-<h2 id="approaches">4. Approaches</h2>
+<h2 id="4-approaches">4. Approaches</h2>
 
 <p>All my approaches were based on <strong>deep convolutional neural network (CNN)</strong>, as I initially believed that human is no match to machine in extracting image feature. However it turned out that machines are not quite there yet. <strong>Understanding neural network performance bottleneck proved to be very important.</strong></p>
 
@@ -154,7 +154,7 @@ Human" /></p>
 
 <hr />
 
-<h3 id="baseline-naive-approach">4.1 Baseline Naive Approach</h3>
+<h3 id="41-baseline-naive-approach">4.1 Baseline Naive Approach</h3>
 
 <p>After deciding to participate in this competition, the first thing I did was to establish a baseline classifier with CNN.</p>
 
@@ -180,7 +180,7 @@ Human" /></p>
 
 <hr />
 
-<h3 id="bounding-box-localization">4.2 Bounding Box Localization</h3>
+<h3 id="42-bounding-box-localization">4.2 Bounding Box Localization</h3>
 
 <p>To help the classifier <strong>locating the whale head</strong> and hence improve the score, I added a <strong>localizer</strong> before the classifier.</p>
 
@@ -190,7 +190,7 @@ Human" /></p>
 
 <p>This is made possible thanks to the <a href="https://www.kaggle.com/c/noaa-right-whale-recognition/forums/t/17421/complete-train-set-head-annotations">annotations by Vinh Nguyen</a> posted to the competition forum.</p>
 
-<h4 id="localizer">4.2.1 Localizer</h4>
+<h4 id="421-localizer">4.2.1 Localizer</h4>
 
 <p>I treated the localization problem as a <strong>regression</strong> problem, so that the objective of the localizer CNN is to <strong>minimize the mean squared error (MSE) between the predicted and actual bounding box</strong>. The bounding boxes were represented by x, y, width and height and were normalized into (0, 1) by dividing with the image size.</p>
 
@@ -213,7 +213,7 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <p><img src="/assets/kaggle-right-whale/bounding_box_test_sample.png" alt="Sample of cropped image from the test set" /></p>
 
-<h4 id="classifier">4.2.2 Classifier</h4>
+<h4 id="422-classifier">4.2.2 Classifier</h4>
 
 <p>The classifier for this approach was again a OxfordNet trained on cropped 256x256 images.</p>
 
@@ -223,7 +223,7 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <hr />
 
-<h3 id="whale-head-aligner">4.3 Whale Head Aligner</h3>
+<h3 id="43-whale-head-aligner">4.3 Whale Head Aligner</h3>
 
 <p>At this point, it was clear that the <strong>main performance bottleneck is that the classifier was not able to focus on the actual discriminating part of the whales (i.e. the callosity pattern)</strong>. So in this approach, a new <strong>aligner replaced the localizer</strong>. Particularly, the aligner rotated the images so the whale’s <strong>bonnet would be always to the right the blowhead</strong> in the cropped image.</p>
 
@@ -239,7 +239,7 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <p><img src="/assets/kaggle-right-whale/deepface_3d_frontalization.png" alt="DeepFace's 3D frontalization" /></p>
 
-<h4 id="aligner">4.3.1 Aligner</h4>
+<h4 id="431-aligner">4.3.1 Aligner</h4>
 
 <p>The aligner was again a OxfordNet-style network and its target was normalized x, y-coordinates of the bonnet and blowhead. Inspired by the recent papers related to face image recognition, I replaced the 2 stacks of fully connected layers with a global averaging layer, and used stride=2 convolution instead of max-pooling when reducing feature maps size. I also started to apply <strong>batch-normalization</strong> everywhere.</p>
 
@@ -249,7 +249,7 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <p>I applied <strong>test-time augmentation</strong> and found that it helped the improving accuracy significantly. So, for each test image, I applied multiply affine transformations and then fed them into the aligner. I inverse applied the affine transformation to the predicted bonnet and blowhead coordinates and simply took the average of those coordinates.</p>
 
-<h4 id="classifier-1">4.3.2 Classifier</h4>
+<h4 id="432-classifier">4.3.2 Classifier</h4>
 
 <p>The main classifier I used in this approach was a similar 19-layers OxfordNet. I carried over the global averaging layer and stride=2 as max-pooling. The difference was that <strong>minimal augmentation</strong> was applied because both the <strong>training and testing images would be aligned</strong>. I empirically found that heavy augmentation prevented the network to converge, and lighter augmentation did not lead to overfitting. For similar reason, I did not apply test-time augmentation to the classifier.</p>
 
@@ -257,11 +257,11 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <hr />
 
-<h2 id="more-experimentations">5. More Experimentations</h2>
+<h2 id="5-more-experimentations">5. More Experimentations</h2>
 
 <p>2 weeks before the deadline, I started to experiment with the state-of-the-art CNN structures. Some of them ended up being used in the final submission.</p>
 
-<h3 id="deep-residual-network-resnet">5.1 Deep Residual Network (ResNet)</h3>
+<h3 id="51-deep-residual-network-resnet">5.1 Deep Residual Network (ResNet)</h3>
 
 <p>The success of deep learning is usually attributed to the highly non-linear nature of neural network with stacks of layers. However the <a href="http://arxiv.org/pdf/1512.03385v1.pdf">ResNet</a> authors observed an counter-intuitive phenomenon – simply adding more layers to a neural network will increase training error. They hypothesized that it would be effective to encourage the network to learn the “residual error” instead of the original mapping.</p>
 
@@ -279,65 +279,65 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <p>Near the end of the competition, I also successfully trained a <strong>very deep and very thin ResNet with 67 layers</strong>. Below is its model definition:</p>
 
-<figure class="highlight"><pre><code class="language-py" data-lang="py"><span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">InputLayer</span><span class="p">(</span>
+<figure class="highlight"><pre><code class="language-py" data-lang="py"><span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">layers</span><span class="p">.</span><span class="n">InputLayer</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s">'in'</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">image_size</span><span class="p">,</span> <span class="n">image_size</span><span class="p">)</span>
 <span class="p">)</span>
-<span class="c"># 256x256</span>
-
+<span class="c1"># 256x256
+</span>
 <span class="n">l</span> <span class="o">=</span> <span class="n">conv2dbn</span><span class="p">(</span>
     <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'l1c1'</span><span class="p">,</span> <span class="n">num_filters</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="o">**</span><span class="n">conv_kwargs</span>
 <span class="p">)</span>
-<span class="c"># 128x128</span>
-
-<span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dnn</span><span class="o">.</span><span class="n">MaxPool2DDNNLayer</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'l1p'</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="c"># 64x64</span>
-
+<span class="c1"># 128x128
+</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">layers</span><span class="p">.</span><span class="n">dnn</span><span class="p">.</span><span class="n">MaxPool2DDNNLayer</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'l1p'</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="c1"># 64x64
+</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">residual_block</span><span class="p">(</span>
-        <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'2c</span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'2c%s'</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
         <span class="n">num_filters</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
         <span class="n">num_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">conv_kwargs</span>
     <span class="p">)</span>
-<span class="c"># 64x64</span>
-
+<span class="c1"># 64x64
+</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
     <span class="n">actual_stride</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">residual_block</span><span class="p">(</span>
-        <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'3c</span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'3c%s'</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
         <span class="n">num_filters</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="n">actual_stride</span><span class="p">,</span>
         <span class="n">num_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">conv_kwargs</span>
     <span class="p">)</span>
-<span class="c"># 32x32</span>
-
+<span class="c1"># 32x32
+</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">23</span><span class="p">):</span>
     <span class="n">actual_stride</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">residual_block</span><span class="p">(</span>
-        <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'4c</span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'4c%s'</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
         <span class="n">num_filters</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="n">actual_stride</span><span class="p">,</span>
         <span class="n">num_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">conv_kwargs</span>
     <span class="p">)</span>
-<span class="c"># 16x16</span>
-
+<span class="c1"># 16x16
+</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">actual_stride</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
     <span class="n">l</span> <span class="o">=</span> <span class="n">residual_block</span><span class="p">(</span>
-        <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'5c</span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'5c%s'</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
         <span class="n">num_filters</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">filter_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">stride</span><span class="o">=</span><span class="n">actual_stride</span><span class="p">,</span>
         <span class="n">num_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">conv_kwargs</span>
     <span class="p">)</span>
-<span class="c"># 8x8</span>
+<span class="c1"># 8x8
+</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">layers</span><span class="p">.</span><span class="n">dnn</span><span class="p">.</span><span class="n">Pool2DDNNLayer</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'gp'</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">'average_inc_pad'</span><span class="p">)</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">layers</span><span class="p">.</span><span class="n">DropoutLayer</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'gpdrop'</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
 
-<span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">dnn</span><span class="o">.</span><span class="n">Pool2DDNNLayer</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'gp'</span><span class="p">,</span> <span class="n">pool_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">'average_inc_pad'</span><span class="p">)</span>
-<span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">DropoutLayer</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'gpdrop'</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
-
-<span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">DenseLayer</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'out'</span><span class="p">,</span> <span class="n">num_units</span><span class="o">=</span><span class="n">n_classes</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">nonlinearities</span><span class="o">.</span><span class="n">softmax</span><span class="p">)</span></code></pre></figure>
+<span class="n">l</span> <span class="o">=</span> <span class="n">nn</span><span class="p">.</span><span class="n">layers</span><span class="p">.</span><span class="n">DenseLayer</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">'out'</span><span class="p">,</span> <span class="n">num_units</span><span class="o">=</span><span class="n">n_classes</span><span class="p">,</span> <span class="n">nonlinearity</span><span class="o">=</span><span class="n">nn</span><span class="p">.</span><span class="n">nonlinearities</span><span class="p">.</span><span class="n">softmax</span><span class="p">)</span></code></pre></figure>
 
 <p>Interestingly, comparing with SGD, the ADAM optimizer led to more stable validation loss. Also, comparing with the 19-layer OxfordNet, the 67-layer ResNet was faster per epoch but slower to reach similar validation loss. However I have not confirmed if it was simply because of unoptimized learning rates.</p>
 
 <p>At the end, I still had a lot of questions about how to best apply residual training to neural network. For example, if residual learning is so effective, would learning the residual of the residual error be even more effective (shortcut of shortcut layer)? Why does the optimizer has difficulty learning the original mapping in the first place? Can we combine ResNet with Highway Network? If the degradation problem is largely overcome, are the existing regularization techniques (maxout, dropout, l2 etc.) still applicable?</p>
 
-<h3 id="inception-v3">5.2 Inception v3</h3>
+<h3 id="52-inception-v3">5.2 Inception v3</h3>
 
 <p>Following the success I had with ResNet, I decided to also replicate the other top performer of the ILSVRC challenge – <a href="http://arxiv.org/pdf/1512.00567v3.pdf">Inception v3</a>.</p>
 
@@ -345,13 +345,13 @@ augmentation was applied to the images as well. To calculate the bounding box of
 
 <p>I did not ended up using the Inception network in the final ensemble.</p>
 
-<h3 id="scaling-training-horizontally-and-idea-validation">5.3 Scaling training horizontally and Idea Validation</h3>
+<h3 id="53-scaling-training-horizontally-and-idea-validation">5.3 Scaling training horizontally and Idea Validation</h3>
 
 <p>Because of my late start, the lengthy neural network training process became a huge problem. Most models used for submission <strong>took at least 36 hours to fully converge</strong>. So I bought an old GTX670 to optimize the hyperparameter for the aligner, while I used my main GTX980Ti for the classifier.</p>
 
 <p>I found that having <strong>additional graphics card was much more helpful than having a faster graphics card</strong>. So one week before the deadline, I hacked together a system that allowed me to easily <strong>train a model on AWS EC2 GPU instances (g2.xlarge) as if I was training it locally</strong>, by running this command.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>eval “$(docker-machine env aws0x)”
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>eval “$(docker-machine env aws0x)”
 docker run -ti \
     -d \
     --device /dev/nvidia0:/dev/nvidia0 \
@@ -361,8 +361,7 @@ docker run -ti \
     -v /mnt/kaggle-right-whale/models:/kaggle-right-whale/models \
     felixlaumon/kaggle-right-whale \
     ./scripts/train_model.py --model … --data --use_cropped --continue_training
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The model definitions were built as part of the container image. The whale images were uploaded to S3 from my local machine when necessary and were mounted inside the container. The trained models were then synced back to the S3 every minute and then to my local machine.</p>
 
@@ -372,7 +371,7 @@ docker run -ti \
 
 <hr />
 
-<h2 id="final-submission">6. Final Submission</h2>
+<h2 id="6-final-submission">6. Final Submission</h2>
 
 <p>The final submission was an ensemble of 6 models:</p>
 
@@ -391,13 +390,13 @@ docker run -ti \
 
 <hr />
 
-<h2 id="unimplemented-approaches">7. Unimplemented Approaches</h2>
+<h2 id="7-unimplemented-approaches">7. Unimplemented Approaches</h2>
 
 <p>Here are some more ideas that should yield significant score improvement. But I was not able to finish implementing them fully before the deadline.</p>
 
 <p><strong>If you attempted any of these approaches or have any suggestion, please leave a comment below as I am very interested in how these ideas could have been panned out.</strong></p>
 
-<h3 id="reposing-the-problem-to-generate-more-training-data">7.1. Reposing the Problem to Generate More Training Data</h3>
+<h3 id="71-reposing-the-problem-to-generate-more-training-data">7.1. Reposing the Problem to Generate More Training Data</h3>
 
 <p>As mentioned before, one of the main challenges was the uneven distribution of number of images per whale, and the limited number of images in general. To avoid this problem, we can first <strong>repose the task as to identify if a pair of images belong to the same whale or not</strong>. Then we can train a classifier to learn an <strong>embedding</strong> which maps the whale images into compact feature vectors. The objective of the classifier was to maximize the euclidean distance of the feature vectors that contains the different whales, and minimize the distance with same whales. This idea was largely based on <strong><a href="http://arxiv.org/pdf/1503.03832v3.pdf">FaceNet</a></strong>.</p>
 
@@ -405,7 +404,7 @@ docker run -ti \
 
 <p><img src="/assets/kaggle-right-whale/facenet.png" alt="Diagrams from FaceNet" /></p>
 
-<h3 id="joint-training-of-whale-aligner-and-classifier">7.2. Joint Training of Whale Aligner and Classifier</h3>
+<h3 id="72-joint-training-of-whale-aligner-and-classifier">7.2. Joint Training of Whale Aligner and Classifier</h3>
 
 <p>I briefly tried to apply <strong><a href="http://arxiv.org/pdf/1506.02025v2.pdf">Spatial Transformer Network</a> (ST-CNN)</strong> to merge the aligner and the classifier. I expected good result because the localization and classification would be trained end-to-end.</p>
 
@@ -425,7 +424,7 @@ docker run -ti \
 
 <p><em>I am particularly interested in understanding how ST-CNN should be applied to this dataset. Please contact me if you have any suggestions.</em></p>
 
-<h3 id="transfer-learning">7.3. Transfer Learning</h3>
+<h3 id="73-transfer-learning">7.3. Transfer Learning</h3>
 
 <p>Transfer learning offers an alternative way to <strong>reduce training time</strong>, other than to simply spawning more GPU instances.</p>
 
@@ -433,13 +432,13 @@ docker run -ti \
 
 <p>I investigated briefly with <strong><a href="http://arxiv.org/pdf/1511.05641v2.pdf">Net2Net</a></strong> but wasn’t able to implement its algorithm.</p>
 
-<h3 id="pre-training">7.4 Pre-training</h3>
+<h3 id="74-pre-training">7.4 Pre-training</h3>
 
 <p>Pre-training the classifier with test images might have helped because the <strong>testing set had more images than the training set</strong>. Combining with section 7.1, we could even <strong>apply the learned embedding to the test set to generate labels</strong>. I expected this might lead to better result than <strong>pseudo-labelling.</strong></p>
 
 <hr />
 
-<h2 id="conclusion">8. Conclusion</h2>
+<h2 id="8-conclusion">8. Conclusion</h2>
 
 <p>I had a lot of fun working on this challenge, and I learned a lot when trying to find new and interesting ideas from academic research. The last 3 weeks were very exhausting for me, because there were so much to do and I was working alone! Next time I would definitely team up.</p>
 
@@ -456,10 +455,6 @@ docker run -ti \
 <p><strong>Update 1</strong>: See further discussions about this blog post at <a href="https://www.reddit.com/r/MachineLearning/comments/40hluu/recognizing_and_localizing_endagered_right_whale/">r/machinelearning</a></p>
 
 <p><strong>Update 2</strong>: The source code is now available at <a href="https://github.com/felixlaumon/kaggle-right-whale">https://github.com/felixlaumon/kaggle-right-whale</a></p>
-
-<hr />
-
-<p>If you are interested in solving challenging problems like this one, my employer <a href="http://alvanon.com">Alvanon</a> is hiring Data Scientist and Software Developer at the Hong Kong office. You should check out the details at <a href="http://alvanon.com/careers/">http://alvanon.com/careers/</a> and contact <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#107;&#101;&#118;&#105;&#110;&#046;&#099;&#097;&#109;&#112;&#098;&#101;&#108;&#108;&#064;&#097;&#108;&#118;&#097;&#110;&#111;&#110;&#046;&#099;&#111;&#109;">&#107;&#101;&#118;&#105;&#110;&#046;&#099;&#097;&#109;&#112;&#098;&#101;&#108;&#108;&#064;&#097;&#108;&#118;&#097;&#110;&#111;&#110;&#046;&#099;&#111;&#109;</a> and <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#102;&#101;&#108;&#105;&#120;&#046;&#108;&#097;&#117;&#064;&#097;&#108;&#118;&#097;&#110;&#111;&#110;&#046;&#099;&#111;&#109;">&#102;&#101;&#108;&#105;&#120;&#046;&#108;&#097;&#117;&#064;&#097;&#108;&#118;&#097;&#110;&#111;&#110;&#046;&#099;&#111;&#109;</a>.</p>
 
   </div>
 
