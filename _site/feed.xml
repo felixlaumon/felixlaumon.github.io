@@ -5,8 +5,8 @@
     <description></description>
     <link>http://felixlaumon.github.io/</link>
     <atom:link href="http://felixlaumon.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 10 Feb 2021 00:33:40 -0800</pubDate>
-    <lastBuildDate>Wed, 10 Feb 2021 00:33:40 -0800</lastBuildDate>
+    <pubDate>Tue, 16 Feb 2021 23:26:37 -0800</pubDate>
+    <lastBuildDate>Tue, 16 Feb 2021 23:26:37 -0800</lastBuildDate>
     <generator>Jekyll v4.2.0</generator>
     
       <item>
@@ -16,8 +16,8 @@ TensorFlow, exported to Tensorflow.Js, and shipped it as a Chrome extension.&lt;
 
 &lt;p&gt;&lt;a href=&quot;https://chrome.google.com/webstore/detail/trypophobia-detection/jnomocmjhfnnimpbibmmhafbcbcnnjel?hl=en&amp;amp;authuser=0&quot;&gt;Install it now!&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;/assets/trypophobia-blocker/browser-google-image.png&quot; alt=&quot;Interface&quot; /&gt;
-&lt;em&gt;All trypophobia-triggering images are blocked in this Google Image search&lt;/em&gt;&lt;/p&gt;
+&lt;video src=&quot;/assets/trypophobia-blocker/google-image-search.mov&quot; autoplay=&quot;&quot; control=&quot;&quot; muted=&quot;&quot; loop=&quot;&quot; width=&quot;100%&quot;&gt;&lt;/video&gt;
+&lt;p&gt;&lt;em&gt;All trypophobia-triggering images are blocked in this Google Image search&lt;/em&gt;&lt;/p&gt;
 
 &lt;h3 id=&quot;what-is-trypophobia&quot;&gt;What is Trypophobia?&lt;/h3&gt;
 

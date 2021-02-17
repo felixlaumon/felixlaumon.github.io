@@ -11,7 +11,8 @@ TensorFlow, exported to Tensorflow.Js, and shipped it as a Chrome extension.
 
 [Install it now!](https://chrome.google.com/webstore/detail/trypophobia-detection/jnomocmjhfnnimpbibmmhafbcbcnnjel?hl=en&authuser=0)
 
-![Interface](/assets/trypophobia-blocker/browser-google-image.png)
+<video src="/assets/trypophobia-blocker/google-image-search.mov"
+autoplay control muted loop width="100%"></video>
 *All trypophobia-triggering images are blocked in this Google Image search*
 
 ### What is Trypophobia?
